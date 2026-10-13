@@ -1,5 +1,20 @@
 # A02 — execução e aceite do painel local de leitura
 
+Revisão pré-tagA02v1.4: negativos token fortalecidos com pai700 e positivo
+prévio; antes, duas fixtures eram recusadas no pai755 de tempfile. Runtime
+intocado, mas novo commit/artefatos/gates substituirão candidato440e0d1 para
+primeira tag0.1.0. Os resultados abaixo são checkpoints anteriores; o novo
+aceite deve ser registrado após a repetição, sem alegar negativos específicos
+de FIFO/symlink por recusa apenas do pai. Nenhuma tag já publicada foi movida.
+
+Aceitev1.4 realmente reexecutado no rootWSL antes do commit: fmt21RustClippy
+releaseinventárioPASS. Positivo privado prévio passou e negativos específicos
+de FIFO/symlink/permissões/bytes passaram com pai700. BinárioreleaseSHA256
+b6edea14c7214ce4574f08d954a8a2e4833995f0f5b6bd054d133f412d0f473e,
+idêntico ao testado no browser/API e reproduçãoTCP independente; somente
+testes mudaram, não o runtime. Clone/pacotes/imagem do novo commit continuam
+obrigatóriosA03 antes da primeira tag.
+
 Data: 2026-10-13. Prompt de entrada:
 [A02 v1.3](../admin/A02-painel-local.md): ensaios iniciais sobre v1.1,
 correção de admissão TCP/token v1.2 e ajuste de fixture v1.3, todos com prompt

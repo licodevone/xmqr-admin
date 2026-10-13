@@ -1,4 +1,4 @@
-# A02 v1.3 — painel local autenticado, somente leitura
+# A02 v1.4 — painel local autenticado, somente leitura
 
 EntradaA00/A01. Objetivo: interface funcional própria para observar um broker
 XMQR e consultar como executar operaçõesCLI; não é API de mutação ao vivo.
@@ -67,3 +67,12 @@ Gate pós-correção: quatro testes web recusaram pai de token não privado.
 A fixture test_state criava TempDir sem chmod700; ajustar somente a fixture
 antes de token::read, preservando exigência de pai privado no runtime.
 Repetir suíte completa e negativos, sem relaxar validação para passar testes.
+
+Revisão final pré-tag: tempfile3.27 cria diretóriosUnix com DirBuilder default
+(modo777 sujeito a umask, neste ambiente755). Duas fixtures token que não
+configuravam700 eram recusadas no pai antes de atingir symlink/FIFO/bytes.
+Fortalecer somente os testes: pai700, teste positivo antes de alterar tipo/
+permissão/bytes, depois negativos específicos; FIFO privado para exercício
+real de O_NONBLOCK+fstat. Runtime/versão/formato não mudam. Manter negativos,
+repetir21gates e registrar checkpoint440e0d1 anterior sem tag; primeira tag
+v0.1.0 deverá apontar o novo commit e seus artefatos exatos, sem mover tags.

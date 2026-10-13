@@ -132,8 +132,11 @@ mod tests {
     #[test]
     fn permissions_symlinks_directories_and_invalid_values_are_refused() {
         let directory = tempfile::tempdir().unwrap();
+        fs::set_permissions(directory.path(), fs::Permissions::from_mode(0o700)).unwrap();
         let path = directory.path().join("access.token");
         fs::write(&path, [b'a'; 64]).unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
+        assert!(read(&path).unwrap().matches(&[b'a'; 64]));
         fs::set_permissions(&path, fs::Permissions::from_mode(0o644)).unwrap();
         assert!(read(&path).is_err());
         fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
@@ -150,6 +153,7 @@ mod tests {
     #[test]
     fn public_parent_and_fifo_are_refused_without_blocking() {
         let directory = tempfile::tempdir().unwrap();
+        fs::set_permissions(directory.path(), fs::Permissions::from_mode(0o700)).unwrap();
         let path = directory.path().join("fifo.token");
         assert!(
             std::process::Command::new("mkfifo")
@@ -162,6 +166,7 @@ mod tests {
         let path = directory.path().join("access.token");
         fs::write(&path, [b'a'; 64]).unwrap();
         fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
+        assert!(read(&path).unwrap().matches(&[b'a'; 64]));
         fs::set_permissions(directory.path(), fs::Permissions::from_mode(0o755)).unwrap();
         assert!(read(&path).is_err());
     }

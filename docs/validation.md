@@ -1,9 +1,16 @@
 # Validação do primeiro XMQR Admin independente
 
 Checkpoint final A01/A02 em 2026-10-13, candidato `xmqr-admin 0.1.0`, após
-correção de admissão TCP/token e ajuste de fixture A02 v1.3. Estes resultados
+correção de admissão TCP/token e ajustes de fixtures A02 v1.4. Estes resultados
 validam A01/A02 no ambiente descrito; não comprovam uma publicação A03,
 homologação Windows nativa ou conformidade MQTT/HTTP completa.
+
+Revisão pré-tagv1.4 fortaleceu dois testes token com pai700/positivo prévio,
+para que FIFO/symlink/bytes fossem verificados após a validação do pai. Gate
+completo21Rust/fmt/Clippy/build/inventário repetidoPASS. Runtime não mudou:
+SHA256b6edea14c7214ce4574f08d954a8a2e4833995f0f5b6bd054d133f412d0f473e
+permaneceu idêntico ao browser/API/admissãoTCP validados. Candidato440e0d1
+continua histórico; primeira tag exige novo commit/artefatos exatos porA03.
 
 ## Ambiente e origem
 
