@@ -1,4 +1,4 @@
-# A04 v1 — planejamento integrado de broker client e admin
+# A04 v1.2 — planejamento integrado de broker client e admin
 
 2026-10-13, antes do documento. Pedido adicional do mantenedor: lembrar dos
 3sistemas e planejar administração inspirada no que Mosquitto oferece.
@@ -35,3 +35,14 @@ quando slotdisponível, corrigirambiguidades, linksrelativos/referências/IDs
 eGitdiffcheck. Apenas docs/prompt/registro=>commit/push, sem bump/tag/release
 adminartificial. MIT/pin/binário/distro0.1.0intocados. Skill nãoautoriza
 publicarcloudPages ou implementar backlog. Rastrearphase3comoemvalidação.
+
+Revisão1.1 apósleitorsemcontexto eANTESdocfix: esclarecer fase4prioridade
+vsU02offline; aceiteonline nãoexigirAPIparaU02; auditoriamínima jáU05,
+U08sóevolução; distinguir credencialRAM/cookie da chave/segredosMQTT;
+nomear2.1initautomatico e vincular fontes/releases/pin/LICENSE; todosAxx
+globais distintos de prompts locais. Nenhuma implementação por essascorreções.
+
+Revisão 1.2 antes da última correção documental: a releitura independente
+confirmou o corpo, mas a conclusão ainda podia sugerir U02/U03 somente depois
+da fase 4 e auditoria somente depois do canal. Repetir na conclusão a exceção
+offline após fase 3 e a auditoria mínima como gate de U05. Sem código ou versão.

@@ -17,6 +17,13 @@ releases anteriores; os candidatos 0.11.6 e 0.9.0 estão nos gates da fase 3.
 O admin independente 0.1.0 já está publicado e conserva o pin de core por
 commit. Planejamento documental não muda sua versão nem esse pin.
 
+Referências desse estado: [release do broker](https://github.com/licodevone/xmqr/releases/tag/v0.11.5),
+[release do client](https://github.com/licodevone/xmqr-client/releases/tag/v0.8.1),
+[release do admin](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0),
+[registro de robustez do client candidato](../../xmqr-client/prompts/registros/C45-robustez-reconexao.md).
+O pin atual é `3606ede844210997fa733408855099535145ac48`, registrado em
+[ORIGIN](../ORIGIN.json); a licença própria está em [LICENSE](../LICENSE).
+
 | Sistema | O que já existe | Responsabilidade nas próximas entregas |
 | --- | --- | --- |
 | XMQR broker | MQTT 3.1.1, TLS/mTLS, ACL, bundle dinâmico com grupos e papéis, reload SIGHUP, estado durável e monitor local | Validar e aplicar alterações, autorizar operações e preservar estado e QoS |
@@ -39,7 +46,9 @@ grupos, papéis e regras de acesso alteráveis durante a execução. Usa uma API
 em tópico reservado; `mosquitto_ctrl dynsec` é uma interface de administração.
 Desabilitar ou excluir uma identidade desconecta seus dispositivos e impede
 novo acesso. A documentação atual também distingue recursos de inicialização
-da série 2.1. Nossa referência executável permanece 2.0.22.
+da série 2.1: o plugin pode gerar uma configuração inicial quando o arquivo
+não existe; na série 2.0, a inicialização usa o controlador. Nossa referência
+executável permanece 2.0.22.
 [Dynamic Security](https://mosquitto.org/documentation/dynamic-security/),
 [mosquitto_ctrl](https://mosquitto.org/man/mosquitto_ctrl-1.html).
 
@@ -103,8 +112,8 @@ maior inserida silenciosamente.
 
 ## Marcos de execução
 
-Os identificadores U abaixo pertencem a esta trilha. A02, A03, A04 e A09
-citados nas dependências pertencem à matriz global do broker. Os prompts
+Os identificadores U abaixo pertencem a esta trilha. Todos os identificadores
+Axx citados nas dependências pertencem à matriz global do broker. Os prompts
 locais A01 a A04 do repositório admin têm outro significado e não fecham
 automaticamente aquelas linhas globais.
 
@@ -114,14 +123,17 @@ automaticamente aquelas linhas globais.
 | U02 | Editor CLI do bundle seguro: listar, validar, criar, alterar e excluir usuários, grupos e papéis | Admin e validador do broker | Depois da fase 3; testes de referências, arquivo privado, lock e atualização atômica; contribui para A02 |
 | U03 | Simulador de ACL e comparação antes/depois | Admin, política do broker e client de teste | U02; explicar qual regra permitiu/negou sem ler payloads; resolver conflitos explicitamente |
 | U04 | ADR do canal administrativo e contrato versionado | Broker, admin e testes independentes | U02/U03; decisão global A04, sem chamar o desenho de canal funcional |
-| U05 | API privada, CLI e operações autenticadas online | Broker e admin; client prova ausência de privilégios | U04; aceite global A09, filas/prazos/RBAC/idempotência e falhas reais |
+| U05 | API privada, CLI e operações autenticadas online | Broker e admin; client prova ausência de privilégios | U04; aceite global A09, filas/prazos/RBAC/idempotência, auditoria mínima das mutações e falhas reais |
 | U06 | Habilitar, revogar, alterar senha e aplicar política | Broker e admin, client e ESP32 de laboratório | U05; aceite A03 com efeitos definidos sobre conexões, sessões e QoS2 durável |
 | U07 | Painel operacional de usuários, grupos, papéis e ACL | Admin e API do broker | U05/U06; escopos por operador, preview/diff e confirmação; não depender de leitura direta de arquivos privados |
-| U08 | Auditoria e diagnóstico administrativo | Broker registra resultado, admin apresenta/exporta | U05; A05/A08, limites de retenção e falha de gravação testados |
+| U08 | Consulta e evolução da auditoria e do diagnóstico | Broker registra resultado, admin apresenta/exporta | U05; ampliar auditoria básica com A05/A08, retenção/rotação/exportação e integridade |
 | U09 | Sessões e retained administráveis | Broker, admin e client de prova | U05/U08; A07, paginação e metadados; ações destrutivas separadas e auditadas |
 | U10 | Perfis, certificados e operação remota | Três sistemas | Coordenar com listeners e rotação da fase 4; validar CA/SAN/revogação sem emitir certificados automaticamente |
 | U11 | Pacotes e matriz de compatibilidade por marco | Três sistemas | Gates do marco, commits exatos, versões independentes, tags imutáveis e releases proporcionais |
 
+Fase 3 é pré-requisito de U02. A fase 4 tem prioridade na sequência global,
+mas não bloqueia preparação offline de U02/U03 quando houver um novo prompt
+de execução autorizado; a API online permanece na trilha da fase 5.
 U02 pode começar com validação e edição offline. Aplicar uma política em
 execução é outra entrega: exige confirmação verificável da revisão ativa,
 não apenas salvar o arquivo ou enviar SIGHUP. Nenhuma dessas etapas começa
@@ -163,7 +175,11 @@ segurança e gestão de estado. O token atual do painel é um acesso local de
 leitura, não um sistema multiusuário de operadores nem senha MQTT. A passagem
 para escrita exige autenticação/escopos próprios, proteção contra CSRF e
 negação de origens indevidas, além das proteções existentes de Host, CSP e
-limites de conexões. Não guardar segredos no navegador, em URLs ou nos logs.
+limites de conexões. Não entregar senhas MQTT ou chaves privadas ao navegador.
+A credencial da sessão administrativa terá tratamento próprio: memória
+transitória ou cookie protegido conforme o contrato aprovado, sem persistir
+em URL, localStorage ou logs. Cookies exigirão proteção CSRF/SameSite e
+HttpOnly; isso é desenho futuro, não comportamento já entregue em 0.1.0.
 
 Senhas serão solicitadas sem eco ou lidas de arquivo privado; certificados
 e chaves não serão emitidos ou exportados pelo painel sem uma nova entrega
@@ -171,7 +187,8 @@ específica. Campos de política inválidos, identidades duplicadas, referência
 pendentes, symlinks, arquivos com permissões abertas e operações sem escopo
 devem falhar sem atualização parcial.
 
-A auditoria registrará operador, operação, revisão, horário e resultado, sem
+A auditoria mínima de mutações faz parte do aceite de U05, antes de U06/U07.
+Registrará operador, operação, revisão, horário e resultado, sem
 senha, token, chave, payload ou hash de senha. IDs sensíveis exigem acesso
 restrito. O desenho deverá definir rotação, retenção, integridade e o que
 acontece se a auditoria falhar; não prometer resistência a adulteração antes
@@ -192,7 +209,9 @@ não deverá incluir banco MQTT, credenciais ou payloads automaticamente.
 ## Critérios de aceite dos três sistemas
 
 Cada marco deverá ter um prompt anterior à implementação, negativos e
-evidências. Uma entrega de segurança só será aceita quando o broker aplicar
+evidências. U02/U03 são aceitos por validação e simulação offline, sem exigir
+API ainda inexistente nem alegar revisão ativa aplicada. Uma entrega de
+segurança com efeito no broker em execução só será aceita quando ele aplicar
 a mudança, o admin confirmar a revisão e o client autorizado/não autorizado
 comprovar o efeito por MQTT independente da interface.
 
@@ -210,10 +229,12 @@ em uma entrega testada; não atualizar por acompanhar um novo número do broker.
 
 ## Ordem sugerida depois da fase 3
 
-Fechar robustez primeiro; depois executar a fase 4 de listeners/perfis/rotação
-com os três componentes explicitados no backlog. A trilha administrativa da
-fase 5 começa com U02/U03 e aprovação U04, entrega o canal U05 e então habilita
-revogação, painel de escrita, auditoria e gestão de estado. Esse encadeamento
+Fechar robustez primeiro. A fase 4 de listeners/perfis/rotação tem prioridade
+global, com os três componentes explicitados no backlog. Após a fase 3, a
+preparação offline de U02/U03 pode ocorrer em paralelo mediante novo prompt
+autorizado. Na fase 5, essa base leva à aprovação U04 e ao canal U05, já com
+auditoria mínima; então habilita revogação, painel de escrita, evolução da
+auditoria e gestão de estado. Esse encadeamento
 mantém uma entrega utilizável por vez e não mistura MQTT5, bridge ou serviço
 Windows com a primeira API administrativa.
 
