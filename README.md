@@ -3,6 +3,12 @@
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
 local. Primeiro marco experimental **0.1.0**. Licença própria MIT.
 
+[Release v0.1.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0)
+publicada com `.deb`/tar Ubuntu26amd64, exportDocker, hashes e evidências.
+[Imagem Docker Hub](https://hub.docker.com/r/lepinheiro100/xmqr-admin-ui):
+`lepinheiro100/xmqr-admin-ui:0.1.0`. Veja [publicação verificada](prompts/registros/A03-release-0.1.0.md)
+e [distribuição](docs/distribution.md). Nenhuma tag antiga/latest foi alterada.
+
 ## O que existe
 
 - CLI: criar/listar usuários, alterar senha, excluir usuário; hash Argon2id;

@@ -14,8 +14,9 @@ Primeira distribuição independente do administrador XMQR, em Rust:
 
 As evidências e checksums acompanham a release. Fonte por prompts em
 [GitHub](https://github.com/licodevone/xmqr-admin),
-[validação](validation.md), [distribuição](distribution.md) e
-[planejamento](roadmap.md). A tag identifica o código aceito; registros
+[validação](https://github.com/licodevone/xmqr-admin/blob/v0.1.0/docs/validation.md),
+[distribuição](https://github.com/licodevone/xmqr-admin/blob/v0.1.0/docs/distribution.md) e
+[planejamento](https://github.com/licodevone/xmqr-admin/blob/main/docs/roadmap.md). A tag identifica o código aceito; registros
 posteriores de publicação podem aparecer em commits documentais de main.
 
 ## Utilização
@@ -23,7 +24,7 @@ posteriores de publicação podem aparecer em commits documentais de main.
 No Ubuntu26amd64, baixar o deb e seu SHA256 desta release, conferir checksum
 antes de executar `sudo apt install ./xmqr-admin_0.1.0-1_amd64.deb`.
 Não há serviço instalado/ativado automaticamente. `xmqr-admin --help`
-explica os comandos; o [README](../README.md) explica token e painel.
+explica os comandos; o [README](https://github.com/licodevone/xmqr-admin/blob/v0.1.0/README.md) explica token e painel.
 O token deve ficar no filesystemLinux privado, fora do repositório.
 
 Imagem: `lepinheiro100/xmqr-admin-ui:0.1.0`,
