@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+mod cli;
+mod config;
+mod listener;
+mod monitor;
+mod state;
+mod token;
+mod users;
+mod web;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<_> = std::env::args_os().skip(1).collect();
+    match args.as_slice() {
+        [command] if command == "serve" => {
+            let config = config::Config::from_env()?;
+            let token = token::read(&config.token_file)?;
+            tokio::runtime::Builder::new_multi_thread()
+                .enable_all()
+                .build()?
+                .block_on(web::serve(config, token))?;
+            Ok(())
+        }
+        [command, flag, path] if command == "token-init" && flag == "--file" => {
+            token::create(std::path::Path::new(path))?;
+            println!("Token local criado em arquivo privado. Nenhum valor foi exibido.");
+            Ok(())
+        }
+        [command] if command == "--help" || command == "-h" => {
+            println!(
+                "XMQR Admin {}\n\nPainel: xmqr-admin serve\nToken: xmqr-admin token-init --file NOVO_ARQUIVO\nUsuários: user create/list/update-password/delete\nEstado: state backup/verify/restore\nSegurança: hash-password; fingerprint CERTIFICADO\nVersão: --version\n\nConsulte README para argumentos completos. CLI offline/Unix; painel local somente leitura.",
+                env!("CARGO_PKG_VERSION")
+            );
+            Ok(())
+        }
+        _ => cli::run(),
+    }
+}

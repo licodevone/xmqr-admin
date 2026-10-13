@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/licodevone/xmqr.git",
+  "source_commit": "3606ede844210997fa733408855099535145ac48",
+  "source_tag": "v0.11.5",
+  "license": "MIT",
+  "copyright_preserved": "Copyright (c) 2026 Luis E. S. Pinheiro",
+  "extracted": [
+    {"source": "src/bin/mqtt-admin/main.rs", "git_blob_sha1": "78d626dd6fe6cf2eb639ddab2cc82d2a1621246f", "target": "src/cli.rs", "adaptation": "crate imports, entry function and independent binary/version name; rustfmt"},
+    {"source": "src/bin/mqtt-admin/users.rs", "git_blob_sha1": "ac4ae27e54b3a5a6b94021bfe23b0c7d8132f38f", "target": "src/users.rs", "adaptation": "rustfmt; additional regression tests may follow"},
+    {"source": "src/bin/mqtt-admin/state.rs", "git_blob_sha1": "958d85cf5374b5a8228631f3d10f9d936fc48657", "target": "src/state.rs", "adaptation": "rustfmt only"}
+  ],
+  "core_reuse": "Immutable Git dependency, not duplicated WAL/codec",
+  "legacy_removed": false
+}

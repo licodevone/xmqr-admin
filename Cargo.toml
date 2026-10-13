@@ -1,0 +1,46 @@
+[package]
+name = "xmqr-admin"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+publish = false
+description = "Administração local e painel de observação do XMQR"
+license = "MIT"
+repository = "https://github.com/licodevone/xmqr-admin"
+readme = "README.md"
+
+[dependencies]
+mqtt-broker = { git = "https://github.com/licodevone/xmqr.git", rev = "3606ede844210997fa733408855099535145ac48" }
+argon2 = "0.5.3"
+axum = "0.8"
+fs2 = "0.4.3"
+rand_core = { version = "0.6.4", features = ["getrandom"] }
+reqwest = { version = "0.12", default-features = false }
+rpassword = "7.5.4"
+rustls-pemfile = "2.2.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10.9"
+subtle = "2.6.1"
+tokio = { version = "1.53.1", features = ["macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
+toml = "0.9.8"
+zeroize = "1.8.2"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+tempfile = "3.27.0"
+tower = { version = "0.5", features = ["util"] }
+
+[profile.release]
+panic = "unwind"
+strip = "symbols"
+lto = "thin"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "deny"
+pedantic = "warn"

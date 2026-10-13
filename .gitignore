@@ -1,0 +1,16 @@
+/target/
+/dist/
+/.serena/
+/.venv/
+__pycache__/
+*.log
+*.key
+*.crt
+*.pem
+*.wal
+*.snapshot*
+state.lock
+*.token
+.env*
+users.toml
+acl.toml

@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "date": "2026-10-13",
+  "prompt": "A02 v1.3",
+  "binary_sha256": "b6edea14c7214ce4574f08d954a8a2e4833995f0f5b6bd054d133f412d0f473e",
+  "scenarios": [
+    "64 incomplete-header peers: 32 admitted and 32 closed before HTTP task admission",
+    "After 11 seconds none remained open",
+    "A new complete HTTP request then returned 200",
+    "Saturated process SIGTERM closed all peers in 5.049 seconds"
+  ],
+  "count": 4,
+  "resources": "isolated test-owned loopback process, private temporary token, no operator state",
+  "cleaned": true,
+  "limits": [
+    "Not exhaustive HTTP security or production certification",
+    "Trusted directory ancestors required; no sandbox against same user or root",
+    "Backend Linux/WSL; native Windows not certified"
+  ]
+}
