@@ -1,6 +1,6 @@
 # A04 — planejamento integrado dos três sistemas
 
-13 de outubro de 2026. Prompt A04 v1.3, preparado antes das alterações e
+13 de outubro de 2026. Prompt A04 v1.4, preparado antes das alterações e
 revisado antes das correções. Pedido: conservar broker, client e admin como
 três sistemas e planejar administração inspirada no Mosquitto.
 
@@ -28,5 +28,8 @@ Não executar testes Rust somente por este planejamento.
 Limites: administração online continua proposta. Nenhum novo canal, CRUD de
 bundle, revogação ou auditoria implementado por esta entrega. Admin conserva
 runtime 0.1.0 e core pin 3606ede844210997fa733408855099535145ac48. A fase 3
-continua em validação; este documento não a encerra. Somente commit/push
+teve aceite técnico e distribuição pelo coordenador P92; este documento não
+é a evidência desse aceite. A04v1.4 apenas atualizou versões/links e estado
+factual após prereleases0.11.6/0.9.0 e conferências remotas concluídas.
+Admin foi exercitado em18cenários, sem mudar pin ou runtime. Somente commit/push
 documental, sem nova tag, pacote, release ou alteração das imagens existentes.

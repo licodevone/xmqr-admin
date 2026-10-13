@@ -6,28 +6,32 @@ receber mensagens. O admin deve administrar identidades, permissões e operaçã
 do broker, com uma interface adequada ao responsável pelo sistema.
 
 O próximo objetivo do admin é passar do painel de leitura para uma gestão
-segura de usuários, grupos, papéis e ACL. Primeiro precisamos fechar a fase 3
-de robustez e aprovar o contrato do canal administrativo. Este planejamento
+segura de usuários, grupos, papéis e ACL. A fase3 de robustez foi aceita no
+recorte experimental; ainda precisamos aprovar o contrato do canal administrativo.
+Este planejamento
 não transforma essas funções futuras em funcionalidades disponíveis.
 
 ## Situação dos três sistemas
 
-Atualização de 13 de outubro de 2026. Broker 0.11.5 e client 0.8.1 são as
-releases anteriores; os candidatos 0.11.6 e 0.9.0 estão nos gates da fase 3.
+Atualização de 13 de outubro de 2026. Broker0.11.6 e client0.9.0 são as
+prereleases atuais, com .deb/imagens/evidências publicadas e conferidas por P92.
+Fase3 aceita no recorte finito, sem declarar produção. Versões0.11.5/0.8.1 anteriores
+permanecem disponíveis.
 O admin independente 0.1.0 já está publicado e conserva o pin de core por
 commit. Planejamento documental não muda sua versão nem esse pin.
 
-Referências desse estado: [release do broker](https://github.com/licodevone/xmqr/releases/tag/v0.11.5),
-[release do client](https://github.com/licodevone/xmqr-client/releases/tag/v0.8.1),
+Referências desse estado: [release do broker](https://github.com/licodevone/xmqr/releases/tag/v0.11.6),
+[release do client](https://github.com/licodevone/xmqr-client/releases/tag/v0.9.0),
 [release do admin](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0),
-[registro de robustez do client candidato](../../xmqr-client/prompts/registros/C45-robustez-reconexao.md).
+[registro de robustez do client](../../xmqr-client/prompts/registros/C45-robustez-reconexao.md)
+e [aceite da fase3](../../xmqr/docs/phase3-acceptance.md).
 O pin atual é `3606ede844210997fa733408855099535145ac48`, registrado em
 [ORIGIN](../ORIGIN.json); a licença própria está em [LICENSE](../LICENSE).
 
 | Sistema | O que já existe | Responsabilidade nas próximas entregas |
 | --- | --- | --- |
 | XMQR broker | MQTT 3.1.1, TLS/mTLS, ACL, bundle dinâmico com grupos e papéis, reload SIGHUP, estado durável e monitor local | Validar e aplicar alterações, autorizar operações e preservar estado e QoS |
-| XMQR client | CLI pub/sub com QoS, certificados, arquivos e JSONL; candidato com prazo total e reconexão limitada | Continuar cliente de dados e comprovar permissões, revogação e recuperação |
+| XMQR client | CLI pub/sub com QoS, certificados, arquivos e JSONL; prazo total e reconexão limitada aceitos em0.9.0 | Continuar cliente de dados e comprovar permissões, revogação e recuperação |
 | XMQR admin | CLI de usuários legados, hash/fingerprint e backup offline; painel local autenticado de agregados | Tornar a administração acessível por CLI e painel, com permissões e auditoria próprias |
 
 O `mqtt-admin` legado permanece no repositório do broker. O novo programa

@@ -1,4 +1,4 @@
-# A04 v1.3 — planejamento integrado de broker client e admin
+# A04 v1.4 — planejamento integrado de broker client e admin
 
 2026-10-13, antes do documento. Pedido adicional do mantenedor: lembrar dos
 3sistemas e planejar administração inspirada no que Mosquitto oferece.
@@ -52,3 +52,11 @@ A02/A03, não da execução da revogação online; essa execução precisa do ca
 A09. A09 inclui auditoria mínima desde a primeira mutação, enquanto A05
 amplia consulta/retenção/integridade. Ajustar somente essas linhas da matriz
 global para evitar dependência circular ou intervalo sem auditoria. Sem código.
+
+Revisão 1.4 antes do fechamento factual: fase3 técnica aceita e prereleases
+broker0.11.6/client0.9.0 publicadas2026-10-13T22:23:52Z, com assets/hashes e
+imagens numeradas verificadas remotamente pelo coordenador P92. Atualizar
+somente o estado atual do plano, links e registro, não propostas U01–U11,
+runtime/pin0.1.0, tags/releases/imagensadmin. Referências antigas de fase3
+em andamento continuam checkpoints históricos deste prompt. MQTT5 permanece
+fase6 futura, não implementada. Links/diffcheck antes de commit/push documental.
