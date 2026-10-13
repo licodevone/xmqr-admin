@@ -1,4 +1,4 @@
-# A04 v1.2 — planejamento integrado de broker client e admin
+# A04 v1.3 — planejamento integrado de broker client e admin
 
 2026-10-13, antes do documento. Pedido adicional do mantenedor: lembrar dos
 3sistemas e planejar administração inspirada no que Mosquitto oferece.
@@ -46,3 +46,9 @@ Revisão 1.2 antes da última correção documental: a releitura independente
 confirmou o corpo, mas a conclusão ainda podia sugerir U02/U03 somente depois
 da fase 4 e auditoria somente depois do canal. Repetir na conclusão a exceção
 offline após fase 3 e a auditoria mínima como gate de U05. Sem código ou versão.
+
+Revisão 1.3 antes de alinhar a matriz global: A04 depende dos CONTRATOS de
+A02/A03, não da execução da revogação online; essa execução precisa do canal
+A09. A09 inclui auditoria mínima desde a primeira mutação, enquanto A05
+amplia consulta/retenção/integridade. Ajustar somente essas linhas da matriz
+global para evitar dependência circular ou intervalo sem auditoria. Sem código.

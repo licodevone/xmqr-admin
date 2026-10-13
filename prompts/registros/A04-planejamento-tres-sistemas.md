@@ -1,6 +1,6 @@
 # A04 — planejamento integrado dos três sistemas
 
-13 de outubro de 2026. Prompt A04 v1.2, preparado antes das alterações e
+13 de outubro de 2026. Prompt A04 v1.3, preparado antes das alterações e
 revisado antes das correções. Pedido: conservar broker, client e admin como
 três sistemas e planejar administração inspirada no Mosquitto.
 
@@ -16,6 +16,9 @@ perguntas. A primeira leitura apontou ambiguidades sobre ordem das fases,
 gates offline/online, auditoria mínima, credenciais do navegador, versão da
 referência e IDs globais. A releitura confirmou o corpo e pediu repetir duas
 distinções na conclusão; essas correções foram feitas sob A04 v1.2.
+O alinhamento v1.3 tornou explícitas as dependências na matriz global:
+contrato de revogação precede o ADR, execução online depende do canal aceito,
+e auditoria básica já integra a primeira mutação desse canal.
 
 Verificação documental: links relativos devem resolver para os três repositórios,
 referências oficiais estão junto às afirmações, e diff sem erros de whitespace.
