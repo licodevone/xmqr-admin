@@ -30,6 +30,12 @@ serviços. Client continua sendo quem publica/recebe mensagens MQTT.
 
 ## Três projetos, sem conflito
 
+O [planejamento integrado dos três sistemas](docs/planejamento-tres-sistemas.md)
+define a evolução administrativa inspirada em Dynamic Security/mosquitto_ctrl:
+bundle seguro, grupos/papéis/ACL, canal autenticado, revogação, auditoria e
+gestão de sessões/retained. São marcos futuros com gates; o painel0.1.0
+permanece somente leitura, sem novo pin/tag/release por este planejamento.
+
 `xmqr` contém o broker e o utilitário legado `mqtt-admin`0.11.5.
 Este projeto instala **`xmqr-admin`**, com versão0.1.0 independente, lado a lado.
 `xmqr-client` contém o cliente `mqtt-client`0.8.1. Nenhum deles é substituído.
