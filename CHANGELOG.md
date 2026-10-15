@@ -1,5 +1,13 @@
 # Histórico
 
+## 0.3.0 — editor offline do bundle seguro
+
+- A06: papéis, grupos, ACLs diretas, vínculos e habilitação/revogação de
+  identidades no bundle TOML v1. Cada candidato usa lock privado, validação
+  pelo core, arquivo temporário 0600, sync e rename atômico.
+- A edição não recarrega o broker nem abre WAL; o canal online A09 permanece
+  pendente. Painel local e CLI legado preservados.
+
 ## 0.2.0 — validação offline do bundle seguro
 
 - A05: `xmqr-admin bundle validate --file ARQUIVO` usa o validador do core

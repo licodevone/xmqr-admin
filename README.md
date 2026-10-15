@@ -1,13 +1,14 @@
 # XMQR Admin
 
-O marco experimental 0.2.0 acrescenta `xmqr-admin bundle validate --file
+O marco experimental 0.2.0 acrescentou `xmqr-admin bundle validate --file
 ARQUIVO` para validar um bundle seguro privado sem aplicar nem modificar a
 política. No Linux, exige arquivo regular 0600 do usuário efetivo e recusa
 symlinks, conforme o validador do core pinado. O comando usa o schema real
 do broker e retorna erro sanitizado. A edição do bundle e a aplicação por
-reload seguem planejadas na release 0.2.0; o painel permanece somente leitura.
+reload eram planejadas na release 0.2.0; o painel permanece somente leitura.
 
-No `main` após a release 0.2.0, o editor offline do bundle já oferece
+O [marco experimental 0.3.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.3.0)
+acrescenta o editor offline do bundle. Ele oferece
 `bundle role|group list/create/update/delete`, `bundle user list/enable/disable`,
 `bundle user update-acl` e `bundle user set-membership`. Use sempre `--file
 ARQUIVO` logo após a ação, `--name` para papel/grupo ou `--username` para
@@ -19,7 +20,7 @@ faz rename atômico; não sinaliza nem altera um broker em execução. O painel
 continua somente leitura e o canal online A09 ainda não está implementado.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
-local. Marco atual **0.2.0**; primeira publicação **0.1.0**. Licença própria MIT.
+local. Marco atual **0.3.0**; primeira publicação **0.1.0**. Licença própria MIT.
 
 [Release v0.1.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0)
 publicada com `.deb`/tar Ubuntu26amd64, exportDocker, hashes e evidências.
@@ -55,7 +56,7 @@ gestão de sessões/retained. São marcos futuros com gates; o painel0.1.0
 permanece somente leitura, sem novo pin/tag/release por este planejamento.
 
 `xmqr` contém o broker e o utilitário legado `mqtt-admin`0.11.5.
-Este projeto instala **`xmqr-admin`**, com versão0.2.0 independente, lado a lado.
+Este projeto instala **`xmqr-admin`**, com versão0.3.0 independente, lado a lado.
 `xmqr-client` contém o cliente `mqtt-client`0.8.1. Nenhum deles é substituído.
 Não é Cargo workspace. Reutilizamos a biblioteca do core por dependênciaGit
 fixada no commit3606ede844210997fa733408855099535145ac48, sem pathdependency.
