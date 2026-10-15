@@ -73,6 +73,9 @@ local. Marco atual **0.4.0**; primeira publicação **0.1.0**. Licença própria
 
 [Release v0.1.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0)
 publicada com `.deb`/tar Ubuntu26amd64, exportDocker, hashes e evidências.
+[Release v0.4.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.4.0)
+publicada com CLI da fase 5, tar/`.deb`, export Docker e hashes conferidos;
+veja [A11](prompts/registros/A11-release-fase5.md).
 [Imagem Docker Hub](https://hub.docker.com/r/lepinheiro100/xmqr-admin-ui):
 `lepinheiro100/xmqr-admin-ui:0.1.0`. Veja [publicação verificada](prompts/registros/A03-release-0.1.0.md)
 e [distribuição](docs/distribution.md). Nenhuma tag antiga/latest foi alterada.
