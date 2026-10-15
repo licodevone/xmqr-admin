@@ -10,6 +10,10 @@ use zeroize::Zeroizing;
 pub struct Token(Zeroizing<Vec<u8>>);
 
 impl Token {
+    pub fn as_str(&self) -> &str {
+        std::str::from_utf8(&self.0).expect("validated hexadecimal token")
+    }
+
     pub fn matches(&self, candidate: &[u8]) -> bool {
         candidate.len() == 64 && bool::from(self.0.as_slice().ct_eq(candidate))
     }

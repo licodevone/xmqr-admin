@@ -1,11 +1,9 @@
 # XMQR Admin
 
 O marco experimental 0.2.0 acrescentou `xmqr-admin bundle validate --file
-ARQUIVO` para validar um bundle seguro privado sem aplicar nem modificar a
-política. No Linux, exige arquivo regular 0600 do usuário efetivo e recusa
-symlinks, conforme o validador do core pinado. O comando usa o schema real
-do broker e retorna erro sanitizado. A edição do bundle e a aplicação por
-reload eram planejadas na release 0.2.0; o painel permanece somente leitura.
+ARQUIVO` para validar o bundle seguro privado com o core pinado. O editor
+offline chegou em 0.3.0. A CLI local `channel` em desenvolvimento aplica o
+bundle pelo socket do broker P107; o painel permanece somente leitura.
 
 O [marco experimental 0.3.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.3.0)
 acrescenta o editor offline do bundle. Ele oferece
@@ -17,7 +15,31 @@ ação. `update-acl` e `set-membership` substituem integralmente suas listas;
 sem opções, limpam as concessões/vínculos correspondentes. A edição exige
 bundle privado existente em filesystem Linux, valida o candidato com o core e
 faz rename atômico; não sinaliza nem altera um broker em execução. O painel
-continua somente leitura e o canal online A09 ainda não está implementado.
+continua somente leitura. O canal online A09 está parcialmente implementado.
+
+## Aplicar bundle pelo canal local
+
+Use o broker a partir do commit P107 `7c25e3f`, em Linux/WSL, com bundle
+dinâmico e as três variáveis `MQTT_ADMIN_*` descritas na
+[documentação do canal](https://github.com/licodevone/xmqr/blob/main/docs/admin-channel.md). Broker e admin precisam
+rodar sob o mesmo UID. O token de operador fica em arquivo privado, nunca em
+argumento. O token do painel web é separado.
+
+```sh
+xmqr-admin channel status --socket /caminho/privado/admin.sock --token-file /caminho/privado/view.token
+xmqr-admin channel reload --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --file /caminho/privado/bundle.toml --expected-generation 1
+xmqr-admin channel receipt --socket /caminho/privado/admin.sock --token-file /caminho/privado/view.token --id ID_EXIBIDO_PELO_RELOAD
+```
+
+`status` informa a geração atual. Edite/valide o bundle antes do `reload`;
+o comando valida novamente, calcula SHA256, gera ID aleatório e **exibe o ID
+antes de enviar**. Salve esse ID: em timeout, desconexão ou resultado incerto,
+consulte `receipt` antes de repetir. Para uma repetição consciente, passe
+`--request-id ID` no final do comando `reload` original, conservando bundle e
+geração originais. O broker recusa mudanças de conteúdo, geração obsoleta ou
+ID conflitante. O recibo persiste no WAL; a política ativa é reaplicada do
+bundle no restart. O broker 0.14.0 não lê o novo documento MQTT v3; faça
+backup offline antes de atualizar se precisar de rollback.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
 local. Marco atual **0.3.0**; primeira publicação **0.1.0**. Licença própria MIT.
@@ -42,7 +64,7 @@ dinâmico do modo seguro. Senhas são pedidas no terminal, não por argumento.
 Mudanças em arquivos legados exigem reiniciar o broker. Backup exige broker
 parado, verificação usa a cópia e restore cria um diretório novo.
 
-Não há gestão de sessões/grupos/ACL ao vivo, emissão de certificados, controle
+Não há gestão de sessões/retained ao vivo, emissão de certificados, controle
 remoto de ESP32, painel de publicação MQTT ou declaração de produção. O painel
 é somente leitura e não abre WAL, não modifica configuração e não reinicia
 serviços. Client continua sendo quem publica/recebe mensagens MQTT.
@@ -53,7 +75,8 @@ O [planejamento integrado dos três sistemas](docs/planejamento-tres-sistemas.md
 define a evolução administrativa inspirada em Dynamic Security/mosquitto_ctrl:
 bundle seguro, grupos/papéis/ACL, canal autenticado, revogação, auditoria e
 gestão de sessões/retained. São marcos futuros com gates; o painel0.1.0
-permanece somente leitura, sem novo pin/tag/release por este planejamento.
+permanece somente leitura; o canal local CLI aplica bundle, mas A09 e o aceite
+global da fase 5 continuam abertos.
 
 `xmqr` contém o broker e o utilitário legado `mqtt-admin`0.11.5.
 Este projeto instala **`xmqr-admin`**, com versão0.3.0 independente, lado a lado.
