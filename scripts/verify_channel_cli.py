@@ -80,6 +80,9 @@ def main():
         process = start(broker, env, endpoint)
         try:
             assert run(admin, 'status', *flags, view)[0]['security_generation'] == 1
+            assert run(admin, 'sessions', *flags, operator)[0]['items'] == []
+            assert run(admin, 'retained', *flags, operator, '--limit', '8')[0]['items'] == []
+            assert run(admin, 'sessions', *flags, view, success=False)[0]['error'] == 'forbidden'
             bad_id = subprocess.run([str(admin), 'channel', 'receipt', *map(str, flags),
                                      str(view), '--id', 'invalid'], capture_output=True, timeout=8)
             assert bad_id.returncode != 0

@@ -25,3 +25,11 @@ Clippy, build release e inventário de licenças no Ubuntu/WSL.
 Compatibilidade: protocolo JSON v1 P107, Linux/WSL, sem alterar o pin do core
 ou o painel web. A09 só será concluído após operações de sessão/retained e
 testes de falha/concorrência; esta CLI é uma fatia parcial.
+
+## rev2 — inventários paginados P108
+
+Expor `channel sessions` e `channel retained` usando token operator. Aceitar
+`--limit` e `--cursor` opcionais, com limites do broker (16/8 itens), imprimir
+JSON de metadados sem payload e cursor seguinte. Não inferir snapshot estável
+entre páginas sob MQTT concorrente. Validar integração com broker isolado,
+viewer negado e limites; A07 continua parcial até as ações auditadas.

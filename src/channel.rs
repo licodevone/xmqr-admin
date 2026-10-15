@@ -40,8 +40,16 @@ mod linux {
         bundle_sha256: Option<&'a str>,
         #[serde(skip_serializing_if = "Option::is_none")]
         target_request_id: Option<&'a str>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        cursor: Option<&'a str>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        limit: Option<u8>,
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "single bounded CLI dispatch and recovery output"
+    )]
     pub fn run(args: &[OsString]) -> io::Result<()> {
         let text = |index: usize| -> io::Result<&str> {
             args.get(index)
@@ -57,7 +65,10 @@ mod linux {
         let token = crate::token::read(Path::new(text(5)?))?;
         let operation = text(1)?;
         let request_id = match (operation, args.len()) {
-            ("status", 6) | ("receipt", 8) | ("reload", 10) => new_id(),
+            ("status", 6)
+            | ("receipt", 8)
+            | ("reload", 10)
+            | ("sessions" | "retained", 6 | 8 | 10) => new_id(),
             ("reload", 12) if text(10)? == "--request-id" => {
                 let id = text(11)?;
                 if !valid_id(id) {
@@ -70,17 +81,50 @@ mod linux {
         let mut request = Request {
             version: 1,
             id: &request_id,
-            operation,
+            operation: match operation {
+                "sessions" => "sessions_list",
+                "retained" => "retained_list",
+                other => other,
+            },
             token: token.as_str(),
             expected_generation: None,
             bundle_sha256: None,
             target_request_id: None,
+            cursor: None,
+            limit: None,
         };
         let digest;
         match operation {
             "status" => {}
             "receipt" if text(6)? == "--id" && valid_id(text(7)?) => {
                 request.target_request_id = Some(text(7)?);
+            }
+            "sessions" | "retained" => {
+                let max = if operation == "sessions" { 16 } else { 8 };
+                if args.len() >= 8 {
+                    match text(6)? {
+                        "--limit" => {
+                            let size = text(7)?
+                                .parse::<u8>()
+                                .map_err(|_| invalid("limite invalido"))?;
+                            if size == 0 || size > max {
+                                return Err(invalid("limite invalido"));
+                            }
+                            request.limit = Some(size);
+                        }
+                        "--cursor" if args.len() == 8 => request.cursor = Some(text(7)?),
+                        _ => return Err(invalid("opcoes de inventario invalidas")),
+                    }
+                }
+                if args.len() == 10 {
+                    if text(8)? != "--cursor" {
+                        return Err(invalid("cursor invalido"));
+                    }
+                    request.cursor = Some(text(9)?);
+                }
+                if request.cursor.is_some_and(|value| value.len() > 1024) {
+                    return Err(invalid("cursor excede limite"));
+                }
             }
             "reload" if text(6)? == "--file" && text(8)? == "--expected-generation" => {
                 let generation = text(9)?

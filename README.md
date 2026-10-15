@@ -29,6 +29,8 @@ argumento. O token do painel web é separado.
 xmqr-admin channel status --socket /caminho/privado/admin.sock --token-file /caminho/privado/view.token
 xmqr-admin channel reload --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --file /caminho/privado/bundle.toml --expected-generation 1
 xmqr-admin channel receipt --socket /caminho/privado/admin.sock --token-file /caminho/privado/view.token --id ID_EXIBIDO_PELO_RELOAD
+xmqr-admin channel sessions --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --limit 16
+xmqr-admin channel retained --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --limit 8
 ```
 
 `status` informa a geração atual. Edite/valide o bundle antes do `reload`;
@@ -40,6 +42,9 @@ geração originais. O broker recusa mudanças de conteúdo, geração obsoleta 
 ID conflitante. O recibo persiste no WAL; a política ativa é reaplicada do
 bundle no restart. O broker 0.14.0 não lê o novo documento MQTT v3; faça
 backup offline antes de atualizar se precisar de rollback.
+As listagens retornam apenas metadados, sem payload; `next_cursor` permite
+pedir a página seguinte com `--cursor VALOR`. Páginas não formam um snapshot
+imutável quando clientes MQTT publicam ou se conectam ao mesmo tempo.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
 local. Marco atual **0.3.0**; primeira publicação **0.1.0**. Licença própria MIT.
