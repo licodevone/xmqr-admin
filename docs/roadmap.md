@@ -6,14 +6,15 @@
 - [x] ~~A06 parcial: editor offline de bundle v1, papéis/grupos/ACL, vínculos e
   habilitação/revogação de identidades, com validação do core antes do rename.~~
 - [x] ~~A05/U02 parcial: validar bundle seguro offline, privado e sem escrita via CLI.~~
-- [ ] Canal administrativo: decisãoA04 e implementaçãoA09 no plano do broker,
-  autenticação/RBAC/filas/idempotência/negativos e operações pelo ator.
-- [ ] Sessões/retained/clientes: leitura paginada e operações explicitamente
-  autorizadas, sem abrirWAL fora do dono.
+- [x] ~~Canal administrativo A09 local: autenticação/RBAC/filas/idempotência,
+  negativos, recibos e operações pelo ator.~~ [Aceite](https://github.com/licodevone/xmqr/blob/main/docs/phase5-acceptance.md).
+- [x] ~~Sessões/retained/clientes: leitura paginada e operações explicitamente
+  autorizadas, sem abrir WAL fora do dono.~~
+- [x] ~~A05/A08: auditoria exportável/rotacionável e diagnóstico redigido de
+  recuperação, backup, espaço e versões.~~
 - [ ] Painel de escrita: integração com canal aceito, confirmações/auditoria,
   acesso por função e rotação de credenciais.
 - [ ] Distribuição estendida/serviçoWindows/arm64/acessoHTTPS remoto.
 
-Marcar somente após gates e registro real. A implementação do painel de leitura
-foi solicitada explicitamente antes do canal de escrita; não aprova esse canal,
-não encerra a fase5 nem suspende B07/B08/C07 do broker/client. MIT preservada.
+O aceite da fase 5 não inclui painel de escrita, acesso remoto, Windows nativo,
+arm64 ou produção. Essas entregas permanecem futuras. MIT preservada.

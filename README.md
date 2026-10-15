@@ -1,9 +1,8 @@
 # XMQR Admin
 
-O marco experimental 0.2.0 acrescentou `xmqr-admin bundle validate --file
-ARQUIVO` para validar o bundle seguro privado com o core pinado. O editor
-offline chegou em 0.3.0. A CLI local `channel` em desenvolvimento aplica o
-bundle pelo socket do broker P107; o painel permanece somente leitura.
+O marco experimental 0.4.0 reúne editor offline do bundle seguro, CLI do canal
+administrativo local, auditoria e diagnóstico de recuperação. O painel web
+permanece somente leitura.
 
 O [marco experimental 0.3.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.3.0)
 acrescenta o editor offline do bundle. Ele oferece
@@ -15,11 +14,11 @@ ação. `update-acl` e `set-membership` substituem integralmente suas listas;
 sem opções, limpam as concessões/vínculos correspondentes. A edição exige
 bundle privado existente em filesystem Linux, valida o candidato com o core e
 faz rename atômico; não sinaliza nem altera um broker em execução. O painel
-continua somente leitura. O canal online A09 está parcialmente implementado.
+continua somente leitura. A aplicação online é feita pelo CLI e canal local.
 
 ## Aplicar bundle pelo canal local
 
-Use o broker a partir do commit P107 `7c25e3f`, em Linux/WSL, com bundle
+Use o broker 0.15.0, em Linux/WSL, com bundle
 dinâmico e as três variáveis `MQTT_ADMIN_*` descritas na
 [documentação do canal](https://github.com/licodevone/xmqr/blob/main/docs/admin-channel.md). Broker e admin precisam
 rodar sob o mesmo UID. O token de operador fica em arquivo privado, nunca em
@@ -34,6 +33,9 @@ xmqr-admin channel retained --socket /caminho/privado/admin.sock --token-file /c
 xmqr-admin channel retained-delete --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --topic topico/concreto
 xmqr-admin channel session-disconnect --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --client-id ID_EXATO
 xmqr-admin channel audit --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --limit 16
+xmqr-admin channel audit-rotate --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --archive /caminho/privado/audit-epoch0.json
+xmqr-admin audit-verify --file /caminho/privado/audit-epoch0.json
+xmqr-admin diagnose --state-dir /caminho/privado/estado --bundle /caminho/privado/bundle.toml --backup /caminho/privado/backup-verificado --socket /caminho/privado/admin.sock --token-file /caminho/privado/view.token
 ```
 
 `status` informa a geração atual. Edite/valide o bundle antes do `reload`;
@@ -44,7 +46,7 @@ consulte `receipt` antes de repetir. Para uma repetição consciente, passe
 geração originais. O broker recusa mudanças de conteúdo, geração obsoleta ou
 ID conflitante. O recibo persiste no WAL; a política ativa é reaplicada do
 bundle no restart. A exclusão de retained também gera ID/recibo durável.
-O broker 0.14.0 não lê o novo documento MQTT v4; faça
+O broker 0.14.0 não lê o novo documento MQTT v5; faça
 backup offline antes de atualizar se precisar de rollback.
 As listagens retornam apenas metadados, sem payload; `next_cursor` permite
 pedir a página seguinte com `--cursor VALOR`. Páginas não formam um snapshot
@@ -55,10 +57,19 @@ duráveis. Não apaga a sessão persistente. Ambas as ações exibem ID antes do
 envio e aceitam `--request-id ID` para repetição consciente após `receipt`.
 `audit` pagina recibos do ator por índice numérico e mostra somente metadados;
 `next_cursor` serve como `--cursor` seguinte. Viewer não pode listar a
-auditoria. A tabela tem limite de 128 e ainda não possui rotação segura.
+auditoria. A tabela tem limite de 128. `audit-rotate` exporta todos os recibos
+para arquivo novo privado 0600, sincroniza arquivo/diretório e só então pede
+ao broker para validar hash/contagem e avançar a época no WAL. Se outra
+mutação ocorrer entre exportação e commit, nada é rotacionado; o arquivo
+exportado fica para inspeção. `audit-verify` confere o SHA256 interno;
+compare-o ao recibo de rotação. IDs antigos não executam após a mudança de
+época; o admin gera novos IDs com prefixo da época lida de `status`.
+`diagnose` não muda o broker nem abre o WAL ativo: valida bundle e backup
+existentes, consulta prontidão/versão, mede espaço livre (piso de 16 MiB) e
+retorna JSON sem caminhos ou segredos. Crie o backup offline com broker parado.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
-local. Marco atual **0.3.0**; primeira publicação **0.1.0**. Licença própria MIT.
+local. Marco atual **0.4.0**; primeira publicação **0.1.0**. Licença própria MIT.
 
 [Release v0.1.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0)
 publicada com `.deb`/tar Ubuntu26amd64, exportDocker, hashes e evidências.
@@ -90,12 +101,12 @@ serviços. Client continua sendo quem publica/recebe mensagens MQTT.
 O [planejamento integrado dos três sistemas](docs/planejamento-tres-sistemas.md)
 define a evolução administrativa inspirada em Dynamic Security/mosquitto_ctrl:
 bundle seguro, grupos/papéis/ACL, canal autenticado, revogação, auditoria e
-gestão de sessões/retained. São marcos futuros com gates; o painel0.1.0
-permanece somente leitura; o canal local CLI aplica bundle, mas A09 e o aceite
-global da fase 5 continuam abertos.
+gestão de sessões/retained. A fase 5 foi aceita no recorte local Linux/WSL
+conforme o [aceite](https://github.com/licodevone/xmqr/blob/main/docs/phase5-acceptance.md).
+O painel web permanece somente leitura; operações online usam o CLI.
 
 `xmqr` contém o broker e o utilitário legado `mqtt-admin`0.11.5.
-Este projeto instala **`xmqr-admin`**, com versão0.3.0 independente, lado a lado.
+Este projeto instala **`xmqr-admin`**, com versão0.4.0 independente, lado a lado.
 `xmqr-client` contém o cliente `mqtt-client`0.8.1. Nenhum deles é substituído.
 Não é Cargo workspace. Reutilizamos a biblioteca do core por dependênciaGit
 fixada no commit3606ede844210997fa733408855099535145ac48, sem pathdependency.

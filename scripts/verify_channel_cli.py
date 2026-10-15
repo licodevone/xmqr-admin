@@ -70,6 +70,22 @@ def run(admin, *args, success=True):
     return [json.loads(line) for line in result.stdout.splitlines()]
 
 
+def raw_admin(endpoint, token, operation, request_id, **fields):
+    with socket.socket(socket.AF_UNIX) as connection:
+        connection.settimeout(3)
+        connection.connect(str(endpoint))
+        packet = dict(version=1, operation=operation, request_id=request_id, token=token)
+        packet.update(fields)
+        connection.sendall(json.dumps(packet).encode() + b'\n')
+        answer = bytearray()
+        while True:
+            chunk = connection.recv(1024)
+            if not chunk:
+                break
+            answer.extend(chunk)
+        return json.loads(answer)
+
+
 def edit_bundle(admin, *args):
     result = subprocess.run([str(admin), 'bundle', *map(str, args)],
                             capture_output=True, text=True, timeout=8)
@@ -283,6 +299,78 @@ def main():
             sessions = run(admin, 'sessions', *flags, operator)[0]['items']
             assert any(item['client_id'] == 'revocation-device' and item['inbound_qos2'] == 1
                        for item in sessions)
+            existing_archive = root / 'existing.json'
+            private(existing_archive, 'do-not-overwrite')
+            refused = subprocess.run([str(admin), 'channel', 'audit-rotate', '--socket', str(endpoint),
+                                      '--token-file', str(operator), '--archive', str(existing_archive)],
+                                     capture_output=True, timeout=8)
+            assert refused.returncode != 0 and existing_archive.read_text() == 'do-not-overwrite'
+            assert run(admin, 'status', *flags, view)[0]['admin_epoch'] == 0
+            archive = root / 'audit-epoch0.json'
+            rotated = run(admin, 'audit-rotate', *flags, operator, '--archive', archive)
+            rotate_id = rotated[0]['request_id']
+            assert rotated[-1]['admin_epoch'] == 1 and rotated[-1]['replayed'] is False
+            assert archive.stat().st_mode & 0o777 == 0o600
+            verified = subprocess.run([str(admin), 'audit-verify', '--file', str(archive)],
+                                      capture_output=True, text=True, timeout=8)
+            assert verified.returncode == 0
+            assert json.loads(verified.stdout)['sha256'] == rotated[0]['archive_sha256']
+            assert run(admin, 'receipt', *flags, view, '--id', rotate_id)[0]['operation'] == 'audit_rotate'
+            assert run(admin, 'status', *flags, view)[0]['admin_epoch'] == 1
+            assert raw_admin(endpoint, 'a' * 64, 'audit_rotate',
+                             '00000001aaaabbbbccccddddeeeeffff',
+                             archive_sha256=rotated[0]['archive_sha256'],
+                             archive_count=rotated[0]['archive_count'])['error'] == 'forbidden'
+            assert raw_admin(endpoint, 'b' * 64, 'audit_rotate',
+                             '00000001aaaabbbbccccddddeeeeffff',
+                             archive_sha256=rotated[0]['archive_sha256'],
+                             archive_count=rotated[0]['archive_count'])['error'] == 'archive_changed'
+            stale = run(admin, 'retained-delete', *flags, operator, *delete_args, success=False)
+            assert stale[-1]['error'] == 'stale_epoch'
+            fresh = run(admin, 'retained-delete', *flags, operator, '--topic', 'lab/group')
+            assert fresh[0]['request_id'].startswith('00000001')
+            assert fresh[-1]['deleted'] is True
+            tampered = root / 'tampered.json'
+            private(tampered, archive.read_text(encoding='utf-8').replace('committed', 'changed', 1))
+            invalid = subprocess.run([str(admin), 'audit-verify', '--file', str(tampered)],
+                                     capture_output=True, timeout=8)
+            assert invalid.returncode != 0
+            stop(process, endpoint)
+            process = start(broker, env, endpoint)
+            assert run(admin, 'status', *flags, view)[0]['admin_epoch'] == 1
+            assert run(admin, 'receipt', *flags, view, '--id', rotate_id)[0]['operation'] == 'audit_rotate'
+            replay = raw_admin(endpoint, 'b' * 64, 'audit_rotate', rotate_id,
+                               archive_sha256=rotated[0]['archive_sha256'],
+                               archive_count=rotated[0]['archive_count'])
+            assert replay['replayed'] is True and replay['admin_epoch'] == 1
+            stop(process, endpoint)
+            backup = root / 'verified-backup'
+            saved = subprocess.run([str(admin), 'state', 'backup', '--state-dir', str(state),
+                                    '--destination', str(backup)], capture_output=True, timeout=8)
+            assert saved.returncode == 0
+            process = start(broker, env, endpoint)
+            diagnostic = ('diagnose', '--state-dir', str(state), '--bundle', str(bundle),
+                          '--backup', str(backup), '--socket', str(endpoint),
+                          '--token-file', str(view))
+            checked = subprocess.run([str(admin), *diagnostic], capture_output=True,
+                                     text=True, timeout=8)
+            assert checked.returncode == 0, checked.stderr
+            report = json.loads(checked.stdout)
+            assert report['ok'] and report['broker_ready'] and report['backup_valid']
+            assert report['broker_version'] and report['admin_version']
+            assert 'fixture' not in checked.stdout and str(root) not in checked.stdout
+            missing_backup = list(diagnostic)
+            missing_backup[6] = str(root / 'missing-backup')
+            checked = subprocess.run([str(admin), *missing_backup], capture_output=True,
+                                     text=True, timeout=8)
+            assert checked.returncode != 0 and json.loads(checked.stdout)['backup_valid'] is False
+            assert str(root) not in checked.stdout
+            invalid_bundle = list(diagnostic)
+            invalid_bundle[4] = str(root / 'missing-bundle')
+            checked = subprocess.run([str(admin), *invalid_bundle], capture_output=True,
+                                     text=True, timeout=8)
+            assert checked.returncode != 0 and json.loads(checked.stdout)['bundle_valid'] is False
+            assert str(root) not in checked.stdout
             print('CHANNEL_CLI_PASS')
         finally:
             if process.poll() is None:

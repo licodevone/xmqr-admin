@@ -29,6 +29,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             channel::run(&args)?;
             Ok(())
         }
+        [command, flag, path] if command == "audit-verify" && flag == "--file" => {
+            channel::verify_archive(std::path::Path::new(path))?;
+            Ok(())
+        }
+        [command, ..] if command == "diagnose" => {
+            channel::diagnose(&args)?;
+            Ok(())
+        }
         [command] if command == "serve" => {
             let config = config::Config::from_env()?;
             let token = token::read(&config.token_file)?;
@@ -45,7 +53,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         [command] if command == "--help" || command == "-h" => {
             println!(
-                "XMQR Admin {}\n\nPainel: xmqr-admin serve\nToken: xmqr-admin token-init --file NOVO_ARQUIVO\nUsuários: user create/list/update-password/delete\nEstado: state backup/verify/restore\nBundle seguro: bundle validate --file ARQUIVO; bundle role|group list/create/update/delete --file ARQUIVO; bundle user list/enable/disable/update-acl/set-membership --file ARQUIVO\nCanal local: channel status|receipt|reload|sessions|retained|retained-delete|session-disconnect|audit --socket CAMINHO --token-file ARQUIVO [opcoes]\nSegurança: hash-password; fingerprint CERTIFICADO\nVersão: --version\n\nConsulte README para argumentos completos. Painel local somente leitura.",
+                "XMQR Admin {}\n\nPainel: xmqr-admin serve\nToken: xmqr-admin token-init --file NOVO_ARQUIVO\nUsuários: user create/list/update-password/delete\nEstado: state backup/verify/restore\nBundle seguro: bundle validate --file ARQUIVO; bundle role|group list/create/update/delete --file ARQUIVO; bundle user list/enable/disable/update-acl/set-membership --file ARQUIVO\nCanal local: channel status|receipt|reload|sessions|retained|retained-delete|session-disconnect|audit|audit-rotate --socket CAMINHO --token-file ARQUIVO [opcoes]\nDiagnóstico: diagnose --state-dir DIR --bundle ARQUIVO --backup ARQUIVO --socket CAMINHO --token-file ARQUIVO\nAuditoria offline: audit-verify --file ARQUIVO\nSegurança: hash-password; fingerprint CERTIFICADO\nVersão: --version\n\nConsulte README para argumentos completos. Painel local somente leitura.",
                 env!("CARGO_PKG_VERSION")
             );
             Ok(())

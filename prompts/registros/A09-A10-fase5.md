@@ -1,0 +1,7 @@
+# A09/A10 — auditoria e diagnóstico do admin independente
+
+- Prompts: [A09](../admin/A09-rotacao-auditoria.md) e [A10](../admin/A10-diagnostico-operacional.md). A10 foi criado antes do código; A09 foi documentado durante a implementação da rotação, exceção de ordem a não repetir.
+- `channel audit-rotate` exporta páginas para arquivo novo privado 0600, sincroniza arquivo/diretório, imprime ID/hash e pede rotação ao broker. `audit-verify` confere SHA256 interno offline. Novos IDs de mutação usam época lida de status. `diagnose` valida bundle/backup, espaço e status/versões em JSON sem caminhos/segredos; não abre WAL ativo.
+- Gates Ubuntu26/WSL: 21 testes unitários + 6 integrações PASS, `cargo fmt --all`, `cargo clippy --locked --all-targets -- -D warnings`, `cargo build --locked --release`, inventário de licenças MIT PASS. `scripts/verify_channel_cli.py` retornou `CHANNEL_CLI_PASS` com broker e admin reais em recursos temporários privados.
+- Negativos da integração: concorrência de quatro comandos com mesmo ID (um commit), viewer sem mutação, arquivo existente, adulteração, hash divergente, replay antigo, restart, backup/bundle ausentes e saída de diagnóstico sem caminho/credencial. Testes broker cobrem capacidade cheia e falha WAL.
+- Aceite: A05/A08/A09 local Linux/WSL PASS; painel web continua somente leitura. Core Git permanece pinado; sem certificar Windows nativo, remoto ou produção.
