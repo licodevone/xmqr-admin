@@ -33,3 +33,19 @@ Expor `channel sessions` e `channel retained` usando token operator. Aceitar
 JSON de metadados sem payload e cursor seguinte. Não inferir snapshot estável
 entre páginas sob MQTT concorrente. Validar integração com broker isolado,
 viewer negado e limites; A07 continua parcial até as ações auditadas.
+
+## rev3 — remover retained com recibo
+
+Expor `channel retained-delete --topic TOPICO [--request-id ID]` somente com
+token operator. Mostrar request_id antes de enviar, não mostrar payload nem
+repetir em timeout. Recusa de tópico inválido, viewer e ID conflitante;
+consulta de recibo recupera resultado após restart. O broker P108 usa documento
+MQTT v4; documentar rollback e não prometer ação de sessão nesta fatia.
+
+## rev4 — desconectar sessão ativa
+
+Expor `channel session-disconnect --client-id ID [--request-id ID]`, com token
+operator e ID recuperável. Broker publica Will autorizado como desconexão não
+graciosa, preservando sessão persistente e inbound QoS2 já aceito; a CLI não
+abre o WAL. Testar viewer proibido, sessão ausente, replay pós-restart e
+conexão real encerrada. Não chamar ação de exclusão de sessão persistente.

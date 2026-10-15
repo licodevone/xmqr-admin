@@ -44,6 +44,10 @@ mod linux {
         cursor: Option<&'a str>,
         #[serde(skip_serializing_if = "Option::is_none")]
         limit: Option<u8>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        topic: Option<&'a str>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        client_id: Option<&'a str>,
     }
 
     #[expect(
@@ -66,11 +70,13 @@ mod linux {
         let operation = text(1)?;
         let request_id = match (operation, args.len()) {
             ("status", 6)
-            | ("receipt", 8)
+            | ("receipt" | "retained-delete" | "session-disconnect", 8)
             | ("reload", 10)
             | ("sessions" | "retained", 6 | 8 | 10) => new_id(),
-            ("reload", 12) if text(10)? == "--request-id" => {
-                let id = text(11)?;
+            ("reload", 12) | ("retained-delete" | "session-disconnect", 10)
+                if text(args.len() - 2)? == "--request-id" =>
+            {
+                let id = text(args.len() - 1)?;
                 if !valid_id(id) {
                     return Err(invalid("request ID deve ter 32 digitos hexadecimais"));
                 }
@@ -84,6 +90,8 @@ mod linux {
             operation: match operation {
                 "sessions" => "sessions_list",
                 "retained" => "retained_list",
+                "retained-delete" => "retained_delete",
+                "session-disconnect" => "session_disconnect",
                 other => other,
             },
             token: token.as_str(),
@@ -92,6 +100,8 @@ mod linux {
             target_request_id: None,
             cursor: None,
             limit: None,
+            topic: None,
+            client_id: None,
         };
         let digest;
         match operation {
@@ -126,6 +136,24 @@ mod linux {
                     return Err(invalid("cursor excede limite"));
                 }
             }
+            "retained-delete" if text(6)? == "--topic" => {
+                let topic = text(7)?;
+                if topic.is_empty() || topic.len() > 1024 || topic.contains(['\0', '+', '#']) {
+                    return Err(invalid("topico retained invalido"));
+                }
+                request.topic = Some(topic);
+                println!("{}", json!({"request_id":request_id,"state":"submitted"}));
+                io::stdout().flush()?;
+            }
+            "session-disconnect" if text(6)? == "--client-id" => {
+                let target = text(7)?;
+                if target.is_empty() || target.len() > 256 || target.contains('\0') {
+                    return Err(invalid("client ID invalido"));
+                }
+                request.client_id = Some(target);
+                println!("{}", json!({"request_id":request_id,"state":"submitted"}));
+                io::stdout().flush()?;
+            }
             "reload" if text(6)? == "--file" && text(8)? == "--expected-generation" => {
                 let generation = text(9)?
                     .parse::<u64>()
@@ -146,7 +174,10 @@ mod linux {
         let response = match send(socket, &request) {
             Ok(response) => response,
             Err(error) => {
-                if operation == "reload" {
+                if matches!(
+                    operation,
+                    "reload" | "retained-delete" | "session-disconnect"
+                ) {
                     eprintln!(
                         "Resultado desconhecido: consulte channel receipt --id {request_id} antes de repetir."
                     );
@@ -156,7 +187,11 @@ mod linux {
         };
         println!("{response}");
         if response["ok"] == false {
-            if operation == "reload" && response["error"] == "result_unknown" {
+            if matches!(
+                operation,
+                "reload" | "retained-delete" | "session-disconnect"
+            ) && response["error"] == "result_unknown"
+            {
                 eprintln!(
                     "Resultado desconhecido: consulte channel receipt --id {request_id} antes de repetir."
                 );

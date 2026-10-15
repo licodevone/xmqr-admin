@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 """Cross-process broker/admin check using private temporary resources."""
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,37 @@ import time
 def private(path, text):
     path.write_text(text, encoding='utf-8')
     path.chmod(0o600)
+
+
+def mqtt_retained(port):
+    def field(value):
+        value = value.encode()
+        return len(value).to_bytes(2, 'big') + value
+
+    with socket.create_connection(('127.0.0.1', port), timeout=3) as connection:
+        body = field('MQTT') + bytes([4, 0xc2, 0, 30]) + field('admin-fixture')
+        body += field('fixture') + field('fixture')
+        connection.sendall(bytes([0x10, len(body)]) + body)
+        assert connection.recv(4) == b'\x20\x02\x00\x00'
+        body = field('lab/retained') + b'payload-fixture'
+        connection.sendall(bytes([0x31, len(body)]) + body)
+        connection.sendall(b'\xe0\x00')
+
+
+def mqtt_pending_qos2_with_will(port):
+    def field(value):
+        value = value.encode()
+        return len(value).to_bytes(2, 'big') + value
+
+    connection = socket.create_connection(('127.0.0.1', port), timeout=3)
+    body = field('MQTT') + bytes([4, 0xec, 0, 30]) + field('active-device')
+    body += field('lab/will') + field('offline') + field('fixture') + field('fixture')
+    connection.sendall(bytes([0x10, len(body)]) + body)
+    assert connection.recv(4) == b'\x20\x02\x00\x00'
+    body = field('lab/retained') + b'\x00\x07' + b'accepted'
+    connection.sendall(bytes([0x34, len(body)]) + body)
+    assert connection.recv(4) == b'\x50\x02\x00\x07'
+    return connection
 
 
 def run(admin, *args, success=True):
@@ -58,9 +90,9 @@ def main():
         bundle = root / 'bundle.toml'
         fixture = ("version=1\n[[users]]\nusername='fixture'\n"
                    "password_hash='$argon2id$v=19$m=19456,t=2,p=1$"
-                   "cHVibGljLXRlc3Qtc2FsdA$"
-                   "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'\n"
-                   "cert_sha256='sha256:" + '00' * 32 + "'\n")
+                   "PJ/v6bCRvdNVr6dTfyfB5w$/P91B0CWkDauFZI2fj17hVdaAilPxom+AAkF39Nc9Xs'\n"
+                   "cert_sha256='sha256:" + '00' * 32 + "'\n"
+                   "publish=['lab/retained','lab/will']\n")
         private(bundle, fixture)
         view = root / 'view.token'
         operator = root / 'operator.token'
@@ -83,6 +115,50 @@ def main():
             assert run(admin, 'sessions', *flags, operator)[0]['items'] == []
             assert run(admin, 'retained', *flags, operator, '--limit', '8')[0]['items'] == []
             assert run(admin, 'sessions', *flags, view, success=False)[0]['error'] == 'forbidden'
+            mqtt_retained(port)
+            deadline = time.monotonic() + 3
+            while not run(admin, 'retained', *flags, operator)[0]['items']:
+                if time.monotonic() > deadline:
+                    raise AssertionError('retained PUBLISH not committed')
+                time.sleep(.02)
+            delete_id = '13579bdf02468ace13579bdf02468ace'
+            delete_args = ('--topic', 'lab/retained', '--request-id', delete_id)
+            assert run(admin, 'retained-delete', *flags, view, *delete_args, success=False)[-1]['error'] == 'forbidden'
+            deleted = run(admin, 'retained-delete', *flags, operator, *delete_args)
+            assert deleted[-1]['deleted'] and deleted[-1]['replayed'] is False
+            assert run(admin, 'retained', *flags, operator)[0]['items'] == []
+            assert run(admin, 'retained-delete', *flags, operator, *delete_args)[-1]['replayed'] is True
+            assert run(admin, 'receipt', *flags, view, '--id', delete_id)[0]['operation'] == 'retained_delete'
+            mqtt_retained(port)
+            concurrent_id = 'aaaaaaaa00000000bbbbbbbb11111111'
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                results = list(pool.map(lambda _: run(admin, 'retained-delete', *flags, operator,
+                                      '--topic', 'lab/retained', '--request-id', concurrent_id)[-1],
+                                      range(4)))
+            assert sum(not item['replayed'] for item in results) == 1
+            assert run(admin, 'retained', *flags, operator)[0]['items'] == []
+            active = mqtt_pending_qos2_with_will(port)
+            try:
+                sessions = run(admin, 'sessions', *flags, operator)[0]['items']
+                assert any(item['client_id'] == 'active-device' and item['inbound_qos2'] == 1
+                           and item['connected'] for item in sessions)
+                disconnect_id = '2468ace13579bdf02468ace13579bdf0'
+                disconnect_args = ('--client-id', 'active-device', '--request-id', disconnect_id)
+                assert run(admin, 'session-disconnect', *flags, view, *disconnect_args,
+                           success=False)[-1]['error'] == 'forbidden'
+                result = run(admin, 'session-disconnect', *flags, operator, *disconnect_args)
+                assert result[-1]['disconnected'] and result[-1]['replayed'] is False
+                assert active.recv(1) == b''
+                sessions = run(admin, 'sessions', *flags, operator)[0]['items']
+                assert any(item['client_id'] == 'active-device' and item['inbound_qos2'] == 1
+                           and not item['connected'] for item in sessions)
+                retained = run(admin, 'retained', *flags, operator)[0]['items']
+                assert any(item['topic'] == 'lab/will' for item in retained)
+                assert run(admin, 'session-disconnect', *flags, operator,
+                           *disconnect_args)[-1]['replayed'] is True
+                assert run(admin, 'receipt', *flags, view, '--id', disconnect_id)[0]['operation'] == 'session_disconnect'
+            finally:
+                active.close()
             bad_id = subprocess.run([str(admin), 'channel', 'receipt', *map(str, flags),
                                      str(view), '--id', 'invalid'], capture_output=True, timeout=8)
             assert bad_id.returncode != 0
@@ -119,6 +195,9 @@ def main():
             process = start(broker, env, endpoint)
             assert run(admin, 'reload', *flags, operator, *reload_flags)[-1]['replayed'] is True
             assert run(admin, 'receipt', *flags, view, '--id', request_id)[0]['outcome'] == 'committed'
+            assert run(admin, 'retained-delete', *flags, operator, *delete_args)[-1]['replayed'] is True
+            assert run(admin, 'session-disconnect', *flags, operator,
+                       *disconnect_args)[-1]['replayed'] is True
             print('CHANNEL_CLI_PASS')
         finally:
             if process.poll() is None:

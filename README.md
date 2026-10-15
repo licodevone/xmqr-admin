@@ -31,6 +31,8 @@ xmqr-admin channel reload --socket /caminho/privado/admin.sock --token-file /cam
 xmqr-admin channel receipt --socket /caminho/privado/admin.sock --token-file /caminho/privado/view.token --id ID_EXIBIDO_PELO_RELOAD
 xmqr-admin channel sessions --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --limit 16
 xmqr-admin channel retained --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --limit 8
+xmqr-admin channel retained-delete --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --topic topico/concreto
+xmqr-admin channel session-disconnect --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --client-id ID_EXATO
 ```
 
 `status` informa a geração atual. Edite/valide o bundle antes do `reload`;
@@ -40,11 +42,16 @@ consulte `receipt` antes de repetir. Para uma repetição consciente, passe
 `--request-id ID` no final do comando `reload` original, conservando bundle e
 geração originais. O broker recusa mudanças de conteúdo, geração obsoleta ou
 ID conflitante. O recibo persiste no WAL; a política ativa é reaplicada do
-bundle no restart. O broker 0.14.0 não lê o novo documento MQTT v3; faça
+bundle no restart. A exclusão de retained também gera ID/recibo durável.
+O broker 0.14.0 não lê o novo documento MQTT v4; faça
 backup offline antes de atualizar se precisar de rollback.
 As listagens retornam apenas metadados, sem payload; `next_cursor` permite
 pedir a página seguinte com `--cursor VALOR`. Páginas não formam um snapshot
 imutável quando clientes MQTT publicam ou se conectam ao mesmo tempo.
+`session-disconnect` encerra uma conexão ativa como desligamento não gracioso:
+Will autorizado é publicado, sessão persistente e inbound QoS2 aceito ficam
+duráveis. Não apaga a sessão persistente. Ambas as ações exibem ID antes do
+envio e aceitam `--request-id ID` para repetição consciente após `receipt`.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
 local. Marco atual **0.3.0**; primeira publicação **0.1.0**. Licença própria MIT.
@@ -69,7 +76,7 @@ dinâmico do modo seguro. Senhas são pedidas no terminal, não por argumento.
 Mudanças em arquivos legados exigem reiniciar o broker. Backup exige broker
 parado, verificação usa a cópia e restore cria um diretório novo.
 
-Não há gestão de sessões/retained ao vivo, emissão de certificados, controle
+Há inventário e ações locais de sessão/retained; não há emissão de certificados, controle
 remoto de ESP32, painel de publicação MQTT ou declaração de produção. O painel
 é somente leitura e não abre WAL, não modifica configuração e não reinicia
 serviços. Client continua sendo quem publica/recebe mensagens MQTT.
