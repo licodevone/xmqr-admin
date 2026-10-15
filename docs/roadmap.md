@@ -4,6 +4,7 @@
 - [x] ~~A02: painel local autenticado de leitura e evidências browser/API.~~ [Evidência](../prompts/registros/A02-painel.md).
 - [x] ~~A03: publicação inicial aceita, tag/release/.deb/Docker.~~ [Evidência](../prompts/registros/A03-release-0.1.0.md).
 - [ ] Próximo: validar/editor de bundle com grupos/papéis/ACL e schema real.
+- [x] ~~A05/U02 parcial: validar bundle seguro offline, privado e sem escrita via CLI.~~
 - [ ] Canal administrativo: decisãoA04 e implementaçãoA09 no plano do broker,
   autenticação/RBAC/filas/idempotência/negativos e operações pelo ator.
 - [ ] Sessões/retained/clientes: leitura paginada e operações explicitamente

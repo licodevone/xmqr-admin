@@ -1,5 +1,12 @@
 # Histórico
 
+## 0.2.0 — validação offline do bundle seguro
+
+- A05: `xmqr-admin bundle validate --file ARQUIVO` usa o validador do core
+  pinado para conferir formato, referências, fingerprint e política de arquivo
+  privado sem modificar o bundle ou o estado. Erros são sanitizados.
+- É a primeira parcela de U02; edição de grupos, papéis e ACL ainda não existe.
+
 ## 0.1.0 — primeiro admin independente
 
 - CLI de usuários/hash/fingerprint e backup/verify/restore preservada, com
