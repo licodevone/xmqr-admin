@@ -9,6 +9,7 @@ import socket
 import subprocess
 import tempfile
 import time
+from urllib.request import urlopen
 
 
 def private(path, text):
@@ -16,28 +17,28 @@ def private(path, text):
     path.chmod(0o600)
 
 
-def mqtt_retained(port):
+def mqtt_retained(port, topic='lab/retained', client_id='admin-fixture'):
     def field(value):
         value = value.encode()
         return len(value).to_bytes(2, 'big') + value
 
     with socket.create_connection(('127.0.0.1', port), timeout=3) as connection:
-        body = field('MQTT') + bytes([4, 0xc2, 0, 30]) + field('admin-fixture')
+        body = field('MQTT') + bytes([4, 0xc2, 0, 30]) + field(client_id)
         body += field('fixture') + field('fixture')
         connection.sendall(bytes([0x10, len(body)]) + body)
         assert connection.recv(4) == b'\x20\x02\x00\x00'
-        body = field('lab/retained') + b'payload-fixture'
+        body = field(topic) + b'payload-fixture'
         connection.sendall(bytes([0x31, len(body)]) + body)
         connection.sendall(b'\xe0\x00')
 
 
-def mqtt_pending_qos2_with_will(port):
+def mqtt_pending_qos2_with_will(port, client_id='active-device'):
     def field(value):
         value = value.encode()
         return len(value).to_bytes(2, 'big') + value
 
     connection = socket.create_connection(('127.0.0.1', port), timeout=3)
-    body = field('MQTT') + bytes([4, 0xec, 0, 30]) + field('active-device')
+    body = field('MQTT') + bytes([4, 0xec, 0, 30]) + field(client_id)
     body += field('lab/will') + field('offline') + field('fixture') + field('fixture')
     connection.sendall(bytes([0x10, len(body)]) + body)
     assert connection.recv(4) == b'\x20\x02\x00\x00'
@@ -45,6 +46,18 @@ def mqtt_pending_qos2_with_will(port):
     connection.sendall(bytes([0x34, len(body)]) + body)
     assert connection.recv(4) == b'\x50\x02\x00\x07'
     return connection
+
+
+def mqtt_connect_result(port, client_id):
+    def field(value):
+        value = value.encode()
+        return len(value).to_bytes(2, 'big') + value
+
+    with socket.create_connection(('127.0.0.1', port), timeout=3) as connection:
+        body = field('MQTT') + bytes([4, 0xc2, 0, 30]) + field(client_id)
+        body += field('fixture') + field('fixture')
+        connection.sendall(bytes([0x10, len(body)]) + body)
+        return connection.recv(4)
 
 
 def run(admin, *args, success=True):
@@ -55,6 +68,13 @@ def run(admin, *args, success=True):
     if not result.stdout.strip():
         raise AssertionError(f'admin returned no JSON: {result.stderr}')
     return [json.loads(line) for line in result.stdout.splitlines()]
+
+
+def edit_bundle(admin, *args):
+    result = subprocess.run([str(admin), 'bundle', *map(str, args)],
+                            capture_output=True, text=True, timeout=8)
+    if result.returncode != 0:
+        raise AssertionError(f'bundle edit refused: {result.stderr}')
 
 
 def start(broker, env, socket_path):
@@ -102,12 +122,17 @@ def main():
         with socket.socket() as reserve:
             reserve.bind(('127.0.0.1', 0))
             port = reserve.getsockname()[1]
+        with socket.socket() as reserve:
+            reserve.bind(('127.0.0.1', 0))
+            monitor_port = reserve.getsockname()[1]
         env = {key: value for key, value in os.environ.items() if not key.startswith('MQTT_')}
         env.update(MQTT_MODE='acl-lab', MQTT_BIND=f'127.0.0.1:{port}',
                    MQTT_STATE_DIR=str(state), MQTT_SECURITY_BUNDLE=str(bundle),
                    MQTT_ADMIN_SOCKET=str(endpoint),
                    MQTT_ADMIN_VIEW_TOKEN_FILE=str(view),
-                   MQTT_ADMIN_OPERATOR_TOKEN_FILE=str(operator))
+                   MQTT_ADMIN_OPERATOR_TOKEN_FILE=str(operator),
+                   MQTT_MONITOR_ENABLED='true',
+                   MQTT_MONITOR_BIND=f'127.0.0.1:{monitor_port}')
         flags = ('--socket', endpoint, '--token-file')
         process = start(broker, env, endpoint)
         try:
@@ -159,6 +184,20 @@ def main():
                 assert run(admin, 'receipt', *flags, view, '--id', disconnect_id)[0]['operation'] == 'session_disconnect'
             finally:
                 active.close()
+            assert run(admin, 'audit', *flags, view, success=False)[0]['error'] == 'forbidden'
+            first_audit = run(admin, 'audit', *flags, operator, '--limit', '1')[0]
+            assert len(first_audit['items']) == 1 and first_audit['next_cursor'] == '1'
+            second_audit = run(admin, 'audit', *flags, operator, '--limit', '1',
+                               '--cursor', first_audit['next_cursor'])[0]
+            assert len(second_audit['items']) == 1
+            assert 'payload-fixture' not in json.dumps(first_audit)
+            assert 'fixture' not in json.dumps(first_audit)
+            with urlopen(f'http://127.0.0.1:{monitor_port}/metrics', timeout=3) as response:
+                metrics = response.read().decode()
+            assert 'xmqr_admin_mutations_committed_total 3' in metrics
+            assert 'xmqr_admin_receipts 3' in metrics
+            assert 'xmqr_admin_mutations_replayed_total ' in metrics
+            assert 'payload-fixture' not in metrics
             bad_id = subprocess.run([str(admin), 'channel', 'receipt', *map(str, flags),
                                      str(view), '--id', 'invalid'], capture_output=True, timeout=8)
             assert bad_id.returncode != 0
@@ -198,6 +237,52 @@ def main():
             assert run(admin, 'retained-delete', *flags, operator, *delete_args)[-1]['replayed'] is True
             assert run(admin, 'session-disconnect', *flags, operator,
                        *disconnect_args)[-1]['replayed'] is True
+            edit_bundle(admin, 'role', 'create', '--file', bundle, '--name', 'sender',
+                        '--publish', 'lab/group', '--publish', 'lab/retained',
+                        '--publish', 'lab/will')
+            edit_bundle(admin, 'group', 'create', '--file', bundle, '--name', 'devices',
+                        '--role', 'sender')
+            edit_bundle(admin, 'user', 'set-membership', '--file', bundle,
+                        '--username', 'fixture', '--group', 'devices')
+            edit_bundle(admin, 'user', 'update-acl', '--file', bundle, '--username', 'fixture')
+            role_id = '11111111222222223333333344444444'
+            applied = run(admin, 'reload', *flags, operator, '--file', bundle,
+                          '--expected-generation', '1', '--request-id', role_id)
+            assert applied[-1]['applied_generation'] == 2
+            mqtt_retained(port, topic='lab/group', client_id='granted-device')
+            deadline = time.monotonic() + 3
+            while not any(item['topic'] == 'lab/group' for item in
+                          run(admin, 'retained', *flags, operator)[0]['items']):
+                if time.monotonic() > deadline:
+                    raise AssertionError('role/group grant not active')
+                time.sleep(.02)
+            mqtt_retained(port, topic='lab/denied', client_id='denied-device')
+            time.sleep(.1)
+            assert not any(item['topic'] == 'lab/denied' for item in
+                           run(admin, 'retained', *flags, operator)[0]['items'])
+            revoking = mqtt_pending_qos2_with_will(port, 'revocation-device')
+            try:
+                edit_bundle(admin, 'user', 'disable', '--file', bundle,
+                            '--username', 'fixture')
+                revoke_id = '55555555666666667777777788888888'
+                applied = run(admin, 'reload', *flags, operator, '--file', bundle,
+                              '--expected-generation', '2', '--request-id', revoke_id)
+                assert applied[-1]['applied_generation'] == 3
+                assert revoking.recv(1) == b''
+                assert mqtt_connect_result(port, 'new-after-revoke') != b'\x20\x02\x00\x00'
+                sessions = run(admin, 'sessions', *flags, operator)[0]['items']
+                assert any(item['client_id'] == 'revocation-device'
+                           and item['inbound_qos2'] == 1 and not item['connected']
+                           for item in sessions)
+            finally:
+                revoking.close()
+            stop(process, endpoint)
+            process = start(broker, env, endpoint)
+            assert mqtt_connect_result(port, 'new-after-restart') != b'\x20\x02\x00\x00'
+            assert run(admin, 'receipt', *flags, view, '--id', revoke_id)[0]['outcome'] == 'committed'
+            sessions = run(admin, 'sessions', *flags, operator)[0]['items']
+            assert any(item['client_id'] == 'revocation-device' and item['inbound_qos2'] == 1
+                       for item in sessions)
             print('CHANNEL_CLI_PASS')
         finally:
             if process.poll() is None:

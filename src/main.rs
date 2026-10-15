@@ -45,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         [command] if command == "--help" || command == "-h" => {
             println!(
-                "XMQR Admin {}\n\nPainel: xmqr-admin serve\nToken: xmqr-admin token-init --file NOVO_ARQUIVO\nUsuários: user create/list/update-password/delete\nEstado: state backup/verify/restore\nBundle seguro: bundle validate --file ARQUIVO; bundle role|group list/create/update/delete --file ARQUIVO; bundle user list/enable/disable/update-acl/set-membership --file ARQUIVO\nCanal local: channel status|receipt|reload|sessions|retained|retained-delete|session-disconnect --socket CAMINHO --token-file ARQUIVO [opcoes]\nSegurança: hash-password; fingerprint CERTIFICADO\nVersão: --version\n\nConsulte README para argumentos completos. Painel local somente leitura.",
+                "XMQR Admin {}\n\nPainel: xmqr-admin serve\nToken: xmqr-admin token-init --file NOVO_ARQUIVO\nUsuários: user create/list/update-password/delete\nEstado: state backup/verify/restore\nBundle seguro: bundle validate --file ARQUIVO; bundle role|group list/create/update/delete --file ARQUIVO; bundle user list/enable/disable/update-acl/set-membership --file ARQUIVO\nCanal local: channel status|receipt|reload|sessions|retained|retained-delete|session-disconnect|audit --socket CAMINHO --token-file ARQUIVO [opcoes]\nSegurança: hash-password; fingerprint CERTIFICADO\nVersão: --version\n\nConsulte README para argumentos completos. Painel local somente leitura.",
                 env!("CARGO_PKG_VERSION")
             );
             Ok(())

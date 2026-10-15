@@ -33,6 +33,7 @@ xmqr-admin channel sessions --socket /caminho/privado/admin.sock --token-file /c
 xmqr-admin channel retained --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --limit 8
 xmqr-admin channel retained-delete --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --topic topico/concreto
 xmqr-admin channel session-disconnect --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --client-id ID_EXATO
+xmqr-admin channel audit --socket /caminho/privado/admin.sock --token-file /caminho/privado/operator.token --limit 16
 ```
 
 `status` informa a geração atual. Edite/valide o bundle antes do `reload`;
@@ -52,6 +53,9 @@ imutável quando clientes MQTT publicam ou se conectam ao mesmo tempo.
 Will autorizado é publicado, sessão persistente e inbound QoS2 aceito ficam
 duráveis. Não apaga a sessão persistente. Ambas as ações exibem ID antes do
 envio e aceitam `--request-id ID` para repetição consciente após `receipt`.
+`audit` pagina recibos do ator por índice numérico e mostra somente metadados;
+`next_cursor` serve como `--cursor` seguinte. Viewer não pode listar a
+auditoria. A tabela tem limite de 128 e ainda não possui rotação segura.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
 local. Marco atual **0.3.0**; primeira publicação **0.1.0**. Licença própria MIT.

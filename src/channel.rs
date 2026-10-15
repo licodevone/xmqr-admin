@@ -72,7 +72,7 @@ mod linux {
             ("status", 6)
             | ("receipt" | "retained-delete" | "session-disconnect", 8)
             | ("reload", 10)
-            | ("sessions" | "retained", 6 | 8 | 10) => new_id(),
+            | ("sessions" | "retained" | "audit", 6 | 8 | 10) => new_id(),
             ("reload", 12) | ("retained-delete" | "session-disconnect", 10)
                 if text(args.len() - 2)? == "--request-id" =>
             {
@@ -90,6 +90,7 @@ mod linux {
             operation: match operation {
                 "sessions" => "sessions_list",
                 "retained" => "retained_list",
+                "audit" => "audit_list",
                 "retained-delete" => "retained_delete",
                 "session-disconnect" => "session_disconnect",
                 other => other,
@@ -109,7 +110,7 @@ mod linux {
             "receipt" if text(6)? == "--id" && valid_id(text(7)?) => {
                 request.target_request_id = Some(text(7)?);
             }
-            "sessions" | "retained" => {
+            "sessions" | "retained" | "audit" => {
                 let max = if operation == "sessions" { 16 } else { 8 };
                 if args.len() >= 8 {
                     match text(6)? {
@@ -134,6 +135,13 @@ mod linux {
                 }
                 if request.cursor.is_some_and(|value| value.len() > 1024) {
                     return Err(invalid("cursor excede limite"));
+                }
+                if operation == "audit"
+                    && request.cursor.is_some_and(|value| {
+                        !value.parse::<u16>().is_ok_and(|number| number <= 128)
+                    })
+                {
+                    return Err(invalid("cursor de auditoria invalido"));
                 }
             }
             "retained-delete" if text(6)? == "--topic" => {

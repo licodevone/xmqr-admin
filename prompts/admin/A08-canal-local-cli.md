@@ -49,3 +49,11 @@ operator e ID recuperável. Broker publica Will autorizado como desconexão não
 graciosa, preservando sessão persistente e inbound QoS2 já aceito; a CLI não
 abre o WAL. Testar viewer proibido, sessão ausente, replay pós-restart e
 conexão real encerrada. Não chamar ação de exclusão de sessão persistente.
+
+## rev5 — consulta limitada de auditoria
+
+Expor `channel audit` para operator, com `--limit` 1..16 e `--cursor`
+numérico opcional. Imprimir somente metadados sem segredo, sem abrir WAL.
+Provar viewer negado, duas páginas, restart e ausência de payload/senha.
+Retenção/rotação de auditoria ainda exige decisão separada; não marcar A05
+como completo só pela listagem.
