@@ -155,7 +155,7 @@ fn required_utf8<'a>(value: &'a std::ffi::OsStr, kind: &str) -> Result<&'a str, 
 fn usage() -> Result<(), Box<dyn Error>> {
     eprintln!("Versao: xmqr-admin --version ou -V");
     eprintln!(
-        "Uso:\n  xmqr-admin user create --users-file ARQUIVO --username USUARIO\n  xmqr-admin user list --users-file ARQUIVO\n  xmqr-admin user update-password --users-file ARQUIVO --username USUARIO\n  xmqr-admin user delete --users-file ARQUIVO --username USUARIO\n  xmqr-admin state backup --state-dir DIR --destination NOVO_DIR\n  xmqr-admin state verify --backup DIR\n  xmqr-admin state restore --backup DIR --state-dir NOVO_DIR\n  xmqr-admin bundle validate --file ARQUIVO\n  xmqr-admin hash-password\n  xmqr-admin fingerprint <client.crt>"
+        "Uso:\n  xmqr-admin user create --users-file ARQUIVO --username USUARIO\n  xmqr-admin user list --users-file ARQUIVO\n  xmqr-admin user update-password --users-file ARQUIVO --username USUARIO\n  xmqr-admin user delete --users-file ARQUIVO --username USUARIO\n  xmqr-admin state backup --state-dir DIR --destination NOVO_DIR\n  xmqr-admin state verify --backup DIR\n  xmqr-admin state restore --backup DIR --state-dir NOVO_DIR\n  xmqr-admin bundle validate --file ARQUIVO\n  xmqr-admin bundle role|group list/create/update/delete --file ARQUIVO [opcoes]\n  xmqr-admin bundle user list/enable/disable/update-acl/set-membership --file ARQUIVO [opcoes]\n  xmqr-admin hash-password\n  xmqr-admin fingerprint <client.crt>"
     );
     std::process::exit(2);
 }

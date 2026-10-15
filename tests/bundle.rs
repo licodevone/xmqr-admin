@@ -77,3 +77,42 @@ fn invalid_references_public_files_and_symlinks_fail_without_contents() {
             .success()
     );
 }
+
+#[test]
+fn editor_cli_applies_private_candidate_and_never_prints_hash() {
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().join("bundle.toml");
+    let original = fixture();
+    fs::write(&path, &original).unwrap();
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
+    let edit = |arguments: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_xmqr-admin"))
+            .args(arguments)
+            .arg("--file")
+            .arg(&path)
+            .output()
+            .unwrap()
+    };
+    let output = edit(&["bundle", "role", "create"]);
+    assert!(!output.status.success());
+    assert_eq!(fs::read_to_string(&path).unwrap(), original);
+    let output = Command::new(env!("CARGO_BIN_EXE_xmqr-admin"))
+        .args(["bundle", "role", "create", "--file"])
+        .arg(&path)
+        .args(["--name", "reader", "--subscribe", "sensor/#"])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(!String::from_utf8_lossy(&output.stdout).contains("argon2"));
+    let result = Command::new(env!("CARGO_BIN_EXE_xmqr-admin"))
+        .args(["bundle", "validate", "--file"])
+        .arg(&path)
+        .output()
+        .unwrap();
+    assert!(result.status.success());
+    assert!(fs::read_to_string(&path).unwrap().contains("reader"));
+}

@@ -3,7 +3,8 @@
 - [x] ~~A01: CLI independente e compatibilidade de usuários/backups.~~ [Evidência](../prompts/registros/A01-cli.md).
 - [x] ~~A02: painel local autenticado de leitura e evidências browser/API.~~ [Evidência](../prompts/registros/A02-painel.md).
 - [x] ~~A03: publicação inicial aceita, tag/release/.deb/Docker.~~ [Evidência](../prompts/registros/A03-release-0.1.0.md).
-- [ ] Próximo: validar/editor de bundle com grupos/papéis/ACL e schema real.
+- [x] ~~A06 parcial: editor offline de bundle v1, papéis/grupos/ACL, vínculos e
+  habilitação/revogação de identidades, com validação do core antes do rename.~~
 - [x] ~~A05/U02 parcial: validar bundle seguro offline, privado e sem escrita via CLI.~~
 - [ ] Canal administrativo: decisãoA04 e implementaçãoA09 no plano do broker,
   autenticação/RBAC/filas/idempotência/negativos e operações pelo ator.

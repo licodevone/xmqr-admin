@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 mod bundle;
+mod bundle_edit;
 mod cli;
 mod config;
 mod listener;
@@ -19,6 +20,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Bundle seguro valido. Nenhum arquivo foi alterado.");
             Ok(())
         }
+        [group, ..] if group == "bundle" => {
+            bundle_edit::run(&std::env::args_os().skip(1).collect::<Vec<_>>())?;
+            Ok(())
+        }
         [command] if command == "serve" => {
             let config = config::Config::from_env()?;
             let token = token::read(&config.token_file)?;
@@ -35,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         [command] if command == "--help" || command == "-h" => {
             println!(
-                "XMQR Admin {}\n\nPainel: xmqr-admin serve\nToken: xmqr-admin token-init --file NOVO_ARQUIVO\nUsuários: user create/list/update-password/delete\nEstado: state backup/verify/restore\nBundle seguro: bundle validate --file ARQUIVO\nSegurança: hash-password; fingerprint CERTIFICADO\nVersão: --version\n\nConsulte README para argumentos completos. CLI offline/Unix; painel local somente leitura.",
+                "XMQR Admin {}\n\nPainel: xmqr-admin serve\nToken: xmqr-admin token-init --file NOVO_ARQUIVO\nUsuários: user create/list/update-password/delete\nEstado: state backup/verify/restore\nBundle seguro: bundle validate --file ARQUIVO; bundle role|group list/create/update/delete --file ARQUIVO; bundle user list/enable/disable/update-acl/set-membership --file ARQUIVO\nSegurança: hash-password; fingerprint CERTIFICADO\nVersão: --version\n\nConsulte README para argumentos completos. CLI offline/Unix; painel local somente leitura.",
                 env!("CARGO_PKG_VERSION")
             );
             Ok(())

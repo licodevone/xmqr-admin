@@ -5,7 +5,18 @@ ARQUIVO` para validar um bundle seguro privado sem aplicar nem modificar a
 política. No Linux, exige arquivo regular 0600 do usuário efetivo e recusa
 symlinks, conforme o validador do core pinado. O comando usa o schema real
 do broker e retorna erro sanitizado. A edição do bundle e a aplicação por
-reload seguem planejadas; o painel permanece somente leitura.
+reload seguem planejadas na release 0.2.0; o painel permanece somente leitura.
+
+No `main` após a release 0.2.0, o editor offline do bundle já oferece
+`bundle role|group list/create/update/delete`, `bundle user list/enable/disable`,
+`bundle user update-acl` e `bundle user set-membership`. Use sempre `--file
+ARQUIVO` logo após a ação, `--name` para papel/grupo ou `--username` para
+identidade; repita `--publish`, `--subscribe`, `--role` e `--group` conforme a
+ação. `update-acl` e `set-membership` substituem integralmente suas listas;
+sem opções, limpam as concessões/vínculos correspondentes. A edição exige
+bundle privado existente em filesystem Linux, valida o candidato com o core e
+faz rename atômico; não sinaliza nem altera um broker em execução. O painel
+continua somente leitura e o canal online A09 ainda não está implementado.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
 local. Marco atual **0.2.0**; primeira publicação **0.1.0**. Licença própria MIT.
