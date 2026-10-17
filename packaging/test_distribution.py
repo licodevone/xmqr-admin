@@ -14,6 +14,25 @@ import build_distribution as BUILD
 
 
 class DistributionContract(unittest.TestCase):
+    def test_core_revision_matches_full_git_pin_and_lock(self):
+        self.assertEqual(BUILD.pinned_core_revision(ROOT),
+                         tomllib.loads((ROOT / 'Cargo.toml').read_text())['dependencies']['mqtt-broker']['rev'])
+        with tempfile.TemporaryDirectory(prefix='xmqr-core-pin-test-') as temp:
+            root = Path(temp)
+            revision = 'a' * 40
+            (root / 'Cargo.toml').write_text(
+                '[dependencies]\nmqtt-broker = { git = "https://example.org/core.git", rev = "' + revision + '" }\n')
+            (root / 'Cargo.lock').write_text(
+                '[[package]]\nname = "mqtt-broker"\nversion = "1.0.0"\nsource = '
+                '"git+https://example.org/core.git?rev=' + revision + '#' + revision + '"\n')
+            self.assertEqual(BUILD.pinned_core_revision(root), revision)
+            (root / 'Cargo.lock').write_text((root / 'Cargo.lock').read_text().replace('#' + revision, '#' + 'b' * 40))
+            with self.assertRaisesRegex(ValueError, 'differs'):
+                BUILD.pinned_core_revision(root)
+            (root / 'Cargo.toml').write_text((root / 'Cargo.toml').read_text().replace(revision, 'main'))
+            with self.assertRaisesRegex(ValueError, 'full commit SHA'):
+                BUILD.pinned_core_revision(root)
+
     def test_revision_negative_matrix(self):
         for bad in ('0', '-1', '01', '1;touch', 'one', '9999999', '1\n'):
             with self.subTest(value=bad), self.assertRaises(ValueError):

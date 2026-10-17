@@ -31,6 +31,21 @@ def revision_number(value):
     return value
 
 
+def pinned_core_revision(root):
+    manifest = tomllib.loads((root / 'Cargo.toml').read_text(encoding='utf8'))
+    dependency = manifest['dependencies'].get('mqtt-broker')
+    if not isinstance(dependency, dict):
+        raise ValueError('mqtt-broker must use an immutable Git dependency')
+    url, revision = dependency.get('git'), dependency.get('rev')
+    if not isinstance(url, str) or not isinstance(revision, str) or not re.fullmatch(r'[0-9a-f]{40}', revision):
+        raise ValueError('mqtt-broker Git revision must be a full commit SHA')
+    lock = tomllib.loads((root / 'Cargo.lock').read_text(encoding='utf8'))
+    entries = [item for item in lock['package'] if item['name'] == 'mqtt-broker']
+    if len(entries) != 1 or entries[0].get('source') != f'git+{url}?rev={revision}#{revision}':
+        raise ValueError('mqtt-broker Cargo.lock source differs from Cargo.toml pin')
+    return revision
+
+
 def source_revision(root, allow_draft):
     commit = subprocess.run(['git', 'rev-parse', '--verify', 'HEAD'], cwd=root,
                             text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -93,6 +108,7 @@ def main():
     if package['name'] != 'xmqr-admin':
         parser.error('not an xmqr-admin source tree')
     version = package['version']
+    core_revision = pinned_core_revision(root)
     commit, draft = source_revision(root, args.allow_draft)
     epoch = 0 if draft else int(subprocess.check_output(['git', 'show', '-s', '--format=%ct', 'HEAD'], cwd=root))
     if not args.skip_build:
@@ -123,7 +139,7 @@ def main():
         for location in (deb_doc, tar_doc):
             shutil.copytree(out / 'third-party-notices', location / 'third-party-notices')
             provenance = {'version': version, 'source_revision': commit, 'draft': draft,
-                          'core_revision': '3606ede844210997fa733408855099535145ac48',
+                          'core_revision': core_revision,
                           'target': 'Ubuntu 26.04 linux/amd64', 'binary_sha256': digest(binary),
                           'cargo_lock_sha256': digest(root / 'Cargo.lock')}
             (location / 'distribution-provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
@@ -153,7 +169,7 @@ def main():
                 'debian_revision': args.revision, 'source_revision': commit, 'draft': draft,
                 'experimental': True, 'native_target': 'Ubuntu 26.04 linux/amd64',
                 'docker_target': 'Debian Bookworm linux/amd64 (separate build)',
-                'core_revision': '3606ede844210997fa733408855099535145ac48',
+                'core_revision': core_revision,
                 'notice_packages': len(notices['packages']),
                 'notice_files': sum(len(p['files']) for p in notices['packages']),
                 'artifacts': artifacts}
