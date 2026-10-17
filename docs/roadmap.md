@@ -19,6 +19,7 @@
 - [x] ~~A15: alinhar core à release broker 0.25.0/estado v12 e distribuir admin 0.7.0 após gates próprios.~~ [Evidência](../prompts/registros/A15-core-v12-release-0.7.md). Painel de escrita e distribuição estendida seguem abertos.
 - [x] ~~A16: alinhar core à release broker 0.26.0/estado v13 e distribuir admin 0.8.0 após gates próprios.~~ [Registro](../prompts/registros/A16-core-v13-release-0.8.md).
 - [x] ~~A17: corrigir a proveniência do core no pacote A16, reconstruir artefatos e verificar manifesto/tar/deb antes da publicação.~~ [Evidência](../prompts/registros/A16-core-v13-release-0.8.md).
+- [ ] A18: alinhar core à release broker 0.27.0/estado v14 e distribuir admin 0.9.0 após gates próprios. [Prompt](../prompts/admin/A18-core-v14-release-0.9.md).
 - [ ] Painel de escrita: integração com canal aceito, confirmações/auditoria,
   acesso por função e rotação de credenciais.
 - [ ] Distribuição estendida/serviçoWindows/arm64/acessoHTTPS remoto.
