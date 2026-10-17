@@ -1,11 +1,11 @@
 # XMQR Admin
 
-A versão candidata experimental 0.8.0 fixa o core Git da tag broker 0.26.0
+A versão experimental publicada 0.8.0 fixa o core Git da tag broker 0.26.0
 para ler estado v13, incluindo associação compartilhada durável e entrega QoS2
 escolhida. [A16](prompts/registros/A16-core-v13-release-0.8.md) registra os gates.
 O backup segue offline e não contém `.mqtt-broker-profile`; para rollback do
 estado v13, preserve antes da migração um backup privado v12. A distribuição
-0.8.0 aguarda todos os gates e a conferência dos artefatos remotos.
+0.8.0 passou nos gates e na conferência dos artefatos remotos.
 
 O marco experimental publicado 0.4.0 reúne editor offline do bundle seguro, CLI do canal
 administrativo local, auditoria e diagnóstico de recuperação. O painel web
@@ -83,7 +83,7 @@ existentes, consulta prontidão/versão, mede espaço livre (piso de 16 MiB) e
 retorna JSON sem caminhos ou segredos. Crie o backup offline com broker parado.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
-local. Versão candidata **0.8.0 experimental**; última publicação 0.7.0. Licença própria MIT.
+local. Versão publicada **0.8.0 experimental**. Licença própria MIT.
 
 [Release v0.1.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0)
 publicada com `.deb`/tar Ubuntu26amd64, exportDocker, hashes e evidências.
@@ -96,8 +96,10 @@ distribui o core broker 0.23.0 com estado v10; veja [A13](prompts/registros/A13-
 distribui o core broker 0.24.0 com estado v11; veja [A14](prompts/registros/A14-core-v11-release-0.6.md).
 [Release v0.7.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.7.0)
 distribui o core broker 0.25.0 com estado v12; veja [A15](prompts/registros/A15-core-v12-release-0.7.md).
+[Release v0.8.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.8.0)
+distribui o core broker 0.26.0 com estado v13; veja [A16](prompts/registros/A16-core-v13-release-0.8.md).
 [Imagem Docker Hub](https://hub.docker.com/r/lepinheiro100/xmqr-admin-ui):
-`lepinheiro100/xmqr-admin-ui:0.7.0` é a versão publicada. Veja [publicação verificada](prompts/registros/A15-core-v12-release-0.7.md)
+`lepinheiro100/xmqr-admin-ui:0.8.0` é a versão publicada. Veja [publicação verificada](prompts/registros/A16-core-v13-release-0.8.md)
 e [distribuição](docs/distribution.md). Nenhuma tag antiga/latest foi alterada.
 
 ## O que existe
@@ -129,7 +131,7 @@ conforme o [aceite](https://github.com/licodevone/xmqr/blob/main/docs/phase5-acc
 O painel web permanece somente leitura; operações online usam o CLI.
 
 `xmqr` contém o broker publicado 0.25.0 e seu utilitário `mqtt-admin` legado.
-Este projeto instala **`xmqr-admin`**, versão 0.7.0 independente, lado a lado.
+Este projeto instala **`xmqr-admin`**, versão 0.8.0 independente, lado a lado.
 `xmqr-client` contém o cliente `mqtt-client` publicado 0.23.0. Nenhum deles é substituído.
 Não é Cargo workspace. Reutilizamos a biblioteca do core por dependênciaGit
 fixada no commit 6462b83858ea5ca57bf13c6e83efa74e4523c637, sem pathdependency.
