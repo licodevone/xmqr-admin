@@ -1,11 +1,11 @@
 # XMQR Admin
 
-A versão experimental 0.6.0 fixa o core Git da tag broker 0.24.0 para ler estado v11,
-incluindo opções MQTT 5 No Local/Retain As Published persistidas. Pacote e
+A versão candidata 0.7.0 fixa o core Git da tag broker 0.25.0 para ler estado v12,
+incluindo Subscription Identifier MQTT 5 persistido por assinatura. O 0.6.0 e seu pacote e
 imagem estão na [release 0.6.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.6.0);
 [A14](prompts/registros/A14-core-v11-release-0.6.md) registra os gates.
 O backup segue offline e não contém `.mqtt-broker-profile`; para rollback do
-estado v11, preserve antes da migração um backup privado v10.
+estado v12, preserve antes da migração um backup privado v11.
 
 O marco experimental publicado 0.4.0 reúne editor offline do bundle seguro, CLI do canal
 administrativo local, auditoria e diagnóstico de recuperação. O painel web
@@ -83,7 +83,7 @@ existentes, consulta prontidão/versão, mede espaço livre (piso de 16 MiB) e
 retorna JSON sem caminhos ou segredos. Crie o backup offline com broker parado.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
-local. Versão publicada **0.6.0 experimental**. Licença própria MIT.
+local. Candidato **0.7.0 experimental**; versão publicada **0.6.0**. Licença própria MIT.
 
 [Release v0.1.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0)
 publicada com `.deb`/tar Ubuntu26amd64, exportDocker, hashes e evidências.
@@ -126,11 +126,11 @@ gestão de sessões/retained. A fase 5 foi aceita no recorte local Linux/WSL
 conforme o [aceite](https://github.com/licodevone/xmqr/blob/main/docs/phase5-acceptance.md).
 O painel web permanece somente leitura; operações online usam o CLI.
 
-`xmqr` contém o broker publicado 0.24.0 e seu utilitário `mqtt-admin` legado.
-Este projeto instala **`xmqr-admin`**, com versão0.6.0 independente, lado a lado.
-`xmqr-client` contém o cliente `mqtt-client` publicado 0.22.0. Nenhum deles é substituído.
+`xmqr` contém o broker publicado 0.25.0 e seu utilitário `mqtt-admin` legado.
+Este projeto instala **`xmqr-admin`**, candidato 0.7.0 independente, lado a lado.
+`xmqr-client` contém o cliente `mqtt-client` publicado 0.23.0. Nenhum deles é substituído.
 Não é Cargo workspace. Reutilizamos a biblioteca do core por dependênciaGit
-fixada no commit 8dde5fda09935fe9d72b3524fe898da39f6bb6f1, sem pathdependency.
+fixada no commit 6462b83858ea5ca57bf13c6e83efa74e4523c637, sem pathdependency.
 [Origem dos arquivos extraídos](ORIGIN.json); [fluxo por prompts](prompts/admin/A00-contexto.md).
 
 ## Compilar no Ubuntu/WSL

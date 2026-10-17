@@ -14,7 +14,7 @@ RUN cargo build --locked --release \
     && python3 scripts/collect_notices.py --output /notices
 
 FROM debian:bookworm-slim AS runtime
-ARG VERSION=0.6.0
+ARG VERSION=0.7.0
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="XMQR Admin UI" \
       org.opencontainers.image.version="${VERSION}" \
