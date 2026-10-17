@@ -1,11 +1,11 @@
 # Distribuição experimental 0.1.0
 
-O marco atual é [v0.5.0 experimental](https://github.com/licodevone/xmqr-admin/releases/tag/v0.5.0):
-pacote Ubuntu 26.04 amd64 `xmqr-admin_0.5.0-1_amd64.deb`, tar e imagem
-`lepinheiro100/xmqr-admin-ui:0.5.0`. Seus hashes e gates estão no
-[registro A13](../prompts/registros/A13-release-core-0.23.md). Para conferir a
+O marco atual é [v0.6.0 experimental](https://github.com/licodevone/xmqr-admin/releases/tag/v0.6.0):
+pacote Ubuntu 26.04 amd64 `xmqr-admin_0.6.0-1_amd64.deb`, tar e imagem
+`lepinheiro100/xmqr-admin-ui:0.6.0`. Seus hashes e gates estão no
+[registro A14](../prompts/registros/A14-core-v11-release-0.6.md). Para conferir a
 versão após uma instalação consciente: `xmqr-admin --version`. O backup do
-estado v10 exige broker parado; o marcador `.mqtt-broker-profile` deve ser
+estado v11 exige broker parado; o marcador `.mqtt-broker-profile` deve ser
 escolhido e verificado separadamente na restauração. Os comandos 0.1.0 abaixo
 documentam o primeiro marco histórico e continuam úteis como modelo para
 construções locais, ajustando a versão de saída.

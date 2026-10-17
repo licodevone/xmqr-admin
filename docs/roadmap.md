@@ -15,7 +15,7 @@
 - [x] ~~A12: core pinado no broker 0.23.0, backup/restore offline do estado v10 e
   perfil de listener explícito; CI PASS.~~ [Evidência](../prompts/registros/A12-core-broker-0.23-compat.md).
 - [x] ~~A13: distribuir admin independente 0.5.0 com core 0.23.0, pacotes e imagem numerados, tag e prerelease verificadas.~~ [Evidência](../prompts/registros/A13-release-core-0.23.md).
-- [ ] A14: alinhar core à release broker 0.24.0/estado v11 e distribuir admin 0.6.0 após gates próprios. [Prompt](../prompts/admin/A14-core-v11-release-0.6.md).
+- [x] ~~A14: alinhar core à release broker 0.24.0/estado v11 e distribuir admin 0.6.0 após gates próprios.~~ [Evidência](../prompts/registros/A14-core-v11-release-0.6.md).
 - [ ] Painel de escrita: integração com canal aceito, confirmações/auditoria,
   acesso por função e rotação de credenciais.
 - [ ] Distribuição estendida/serviçoWindows/arm64/acessoHTTPS remoto.
