@@ -1,5 +1,11 @@
 # XMQR Admin
 
+O candidato 0.6.0 fixa o core Git da tag broker 0.24.0 para ler estado v11,
+incluindo opções MQTT 5 No Local/Retain As Published persistidas. O admin 0.5.0
+permanece a última versão publicada até os gates [A14](prompts/registros/A14-core-v11-release-0.6.md).
+O backup segue offline e não contém `.mqtt-broker-profile`; para rollback do
+estado v11, preserve antes da migração um backup privado v10.
+
 O marco experimental publicado 0.4.0 reúne editor offline do bundle seguro, CLI do canal
 administrativo local, auditoria e diagnóstico de recuperação. O painel web
 permanece somente leitura.

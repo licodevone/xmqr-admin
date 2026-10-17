@@ -1,5 +1,10 @@
 # Histórico
 
+## 0.6.0 — core broker 0.24.0 e estado v11 (candidato experimental)
+
+- A14: core Git imutável `8dde5fda` do broker publicado 0.24.0; backup/verify/restore offline de estado v11 com No Local e Retain As Published persistidos. O perfil `.mqtt-broker-profile` permanece externo ao backup e deve ser selecionado explicitamente. Painel continua somente leitura.
+- Pacote Ubuntu 26.04 amd64 e imagem numerada dependem dos gates de distribuição A14. Broker 0.23.0 e admin 0.5.0 não reabrem estado v11; rollback de estado exige backup privado v10 anterior à migração.
+
 ## 0.5.0 — core broker 0.23.0 (experimental)
 
 - A12: core Git do broker atualizado de `3606ede` (0.11.5) para a fonte exata publicada 0.23.0 (`b884a919`), com estado durável v10 e dependências/licenças revisadas. CLI, canal e painel preservados. Backup/restore continua offline; o perfil de listener deve ser escolhido explicitamente ao reabrir estado restaurado.
