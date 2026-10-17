@@ -1,0 +1,4 @@
+# A15 — compatibilidade core v12 e distribuição 0.7.0
+
+- [Prompt A15](../admin/A15-core-v12-release-0.7.md) criado e commitado antes do pin. Broker [v0.25.0](https://github.com/licodevone/xmqr/releases/tag/v0.25.0) publicado com tag anotada no commit `6462b83858ea5ca57bf13c6e83efa74e4523c637`.
+- Etapa de compatibilidade: core Git fixado no commit exato, Cargo.lock e inventário de licenças atualizados; sem dependência de caminho. [Integração offline](../../scripts/verify_core_025_state_v12.py) `A15_V12_PASS`: assinatura durável com IDs repetidos preservada em backup/verify/restore, lock ativo recusado, perfil externo explícito e snapshot adulterado recusado. 21 testes unitários, 3 de bundle e 3 de CLI, fmt, Clippy, build release, licenças, 10 contratos de pacote, 3 de export e `CHANNEL_CLI_PASS` com broker 0.25.0. Painel continua somente leitura. CI do pin e distribuição 0.7.0 pendentes.
