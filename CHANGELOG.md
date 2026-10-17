@@ -1,5 +1,9 @@
 # Histórico
 
+## Em desenvolvimento após 0.9.0
+
+- A19: core do broker P164 fixado por commit imutável, com documento v15 e Will pendente que conserva Message Expiry Interval em backup/verify/restore. Admin 0.9.0 também transporta backup bruto v15, mas broker 0.28.0 não o abre; rollback executável exige backup privado v14 anterior.
+
 ## 0.9.0 — core broker 0.27.0 e estado v14 (experimental)
 
 - A18: core Git imutável `53d86a7e296c158d9247bc5011dec1da49c39b29` do broker 0.27.0. Backup/verify/restore offline preserva origem de cópia QoS1 compartilhada redistribuída, Subscription Identifier e fila do membro sobrevivente. Perfil de listener permanece externo e explícito; painel continua somente leitura.

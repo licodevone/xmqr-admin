@@ -1,5 +1,13 @@
 # XMQR Admin
 
+A árvore após 0.9.0 fixa o broker P164 no commit `ee9d41c18ca583e6c34962feab8ceb417a43d968`
+para operar com o documento MQTT v15 e preservar, em backup/verify/restore
+offline, um Will pendente com intervalo de validade. O admin 0.9.0 publicado
+também consegue copiar um backup bruto v15 sem interpretar o documento, mas
+o broker 0.28.0 rejeita v15 (`Malformed` no ensaio). Para rollback executável,
+guarde um backup privado v14 anterior à primeira gravação v15. A atualização
+do admin ainda não recebeu tag/release. [Prompt A19](prompts/admin/19-core-v15-compatibility.md).
+
 A versão experimental publicada 0.9.0 fixa o core Git do broker 0.27.0 e lê
 estado v14, inclusive origem durável e redistribuição de cópia QoS1
 compartilhada. [A18](prompts/registros/A18-core-v14-release-0.9.md) registra

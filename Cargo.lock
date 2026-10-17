@@ -761,8 +761,8 @@ dependencies = [
 
 [[package]]
 name = "mqtt-broker"
-version = "0.27.0"
-source = "git+https://github.com/licodevone/xmqr.git?rev=53d86a7e296c158d9247bc5011dec1da49c39b29#53d86a7e296c158d9247bc5011dec1da49c39b29"
+version = "0.28.0"
+source = "git+https://github.com/licodevone/xmqr.git?rev=ee9d41c18ca583e6c34962feab8ceb417a43d968#ee9d41c18ca583e6c34962feab8ceb417a43d968"
 dependencies = [
  "argon2",
  "crc32fast",
