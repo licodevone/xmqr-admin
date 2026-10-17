@@ -5,6 +5,10 @@ do mqtt-admin legado dentro do broker. Minor acrescenta fatia; patch corrige
 defeito. Documentação isolada não muda a versão. Tags identificam código aceito
 e não são movidas para incorporar registros de publicação posteriores.
 
+A12 em desenvolvimento após 0.4.0 usa o core Git imutável do broker 0.23.0
+(`b884a919f44a3a14c53b973b8a3f3e0aabc663e3`); a versão própria do admin
+permanece 0.4.0 até um marco de distribuição testado.
+
 Pedido do mantenedor autoriza commit/push e tags após alterações de código
 validadas; prereleases e distribuição quando o marco estiver pronto. Sequência
 em prompts/admin/A03-distribuicao.md. Semforce, overwrite oulatest. PacoteDebian

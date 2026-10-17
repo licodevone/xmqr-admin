@@ -4,6 +4,13 @@ O marco experimental 0.4.0 reúne editor offline do bundle seguro, CLI do canal
 administrativo local, auditoria e diagnóstico de recuperação. O painel web
 permanece somente leitura.
 
+Em desenvolvimento após 0.4.0, A12 fixa o core Git do broker publicado 0.23.0
+para validar bundle e backup/restore de estado v10. O backup durável não inclui
+`.mqtt-broker-profile`: ao restaurar, escolha e confira o perfil do listener
+separadamente, com o broker parado. O broker recusa iniciar `open-lab` sobre
+estado restaurado sem marcador; o admin não cria nem copia esse marcador.
+O painel permanece somente leitura e a versão distribuída do admin ainda é 0.4.0.
+
 O [marco experimental 0.3.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.3.0)
 acrescenta o editor offline do bundle. Ele oferece
 `bundle role|group list/create/update/delete`, `bundle user list/enable/disable`,

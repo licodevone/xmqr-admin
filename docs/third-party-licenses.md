@@ -10,7 +10,11 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | --- | --- | --- |
 | aho-corasick | 1.1.5 | `Unlicense OR MIT` |
 | argon2 | 0.5.3 | `MIT OR Apache-2.0` |
+| asn1-rs | 0.7.2 | `MIT OR Apache-2.0` |
+| asn1-rs-derive | 0.6.0 | `MIT OR Apache-2.0` |
+| asn1-rs-impl | 0.2.0 | `MIT/Apache-2.0` |
 | atomic-waker | 1.1.2 | `Apache-2.0 OR MIT` |
+| autocfg | 1.5.1 | `Apache-2.0 OR MIT` |
 | aws-lc-rs | 1.18.2 | `ISC AND (Apache-2.0 OR ISC)` |
 | aws-lc-sys | 0.46.0 | `ISC AND (Apache-2.0 OR ISC) AND Apache-2.0 AND MIT AND BSD-3-Clause AND (Apache-2.0 OR ISC OR MIT) AND (Apache-2.0 OR ISC OR MIT-0)` |
 | axum | 0.8.9 | `MIT` |
@@ -29,6 +33,9 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | cpufeatures | 0.2.17 | `MIT OR Apache-2.0` |
 | crc32fast | 1.5.2 | `MIT OR Apache-2.0` |
 | crypto-common | 0.1.7 | `MIT OR Apache-2.0` |
+| data-encoding | 2.11.1 | `MIT` |
+| der-parser | 10.0.0 | `MIT OR Apache-2.0` |
+| deranged | 0.5.9 | `MIT OR Apache-2.0` |
 | digest | 0.10.7 | `MIT OR Apache-2.0` |
 | displaydoc | 0.2.7 | `MIT OR Apache-2.0` |
 | dunce | 1.0.5 | `CC0-1.0 OR MIT-0 OR Apache-2.0` |
@@ -78,15 +85,23 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | matchit | 0.8.4 | `MIT AND BSD-3-Clause` |
 | memchr | 2.8.3 | `Unlicense OR MIT` |
 | mime | 0.3.17 | `MIT OR Apache-2.0` |
+| minimal-lexical | 0.2.1 | `MIT/Apache-2.0` |
 | mio | 1.2.4 | `MIT` |
-| mqtt-broker | 0.11.5 | `MIT` |
+| mqtt-broker | 0.23.0 | `MIT` |
+| nom | 7.1.3 | `MIT` |
 | nu-ansi-term | 0.50.3 | `MIT` |
+| num-bigint | 0.4.8 | `MIT OR Apache-2.0` |
+| num-conv | 0.2.2 | `MIT OR Apache-2.0` |
+| num-integer | 0.1.47 | `MIT OR Apache-2.0` |
+| num-traits | 0.2.19 | `MIT OR Apache-2.0` |
+| oid-registry | 0.8.1 | `MIT OR Apache-2.0` |
 | once_cell | 1.21.4 | `MIT OR Apache-2.0` |
 | password-hash | 0.5.0 | `MIT OR Apache-2.0` |
 | percent-encoding | 2.3.2 | `MIT OR Apache-2.0` |
 | pin-project-lite | 0.2.17 | `Apache-2.0 OR MIT` |
 | pkg-config | 0.3.34 | `MIT OR Apache-2.0` |
 | potential_utf | 0.1.6 | `Unicode-3.0` |
+| powerfmt | 0.2.1 | `MIT OR Apache-2.0` |
 | proc-macro2 | 1.0.107 | `MIT OR Apache-2.0` |
 | quote | 1.0.47 | `MIT OR Apache-2.0` |
 | r-efi | 6.0.0 | `MIT OR Apache-2.0 OR LGPL-2.1-or-later` |
@@ -97,6 +112,7 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | ring | 0.17.14 | `Apache-2.0 AND ISC` |
 | rpassword | 7.5.4 | `Apache-2.0` |
 | rtoolbox | 0.0.6 | `Apache-2.0` |
+| rusticata-macros | 4.1.0 | `MIT/Apache-2.0` |
 | rustix | 1.1.5 | `Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT` |
 | rustls | 0.23.45 | `Apache-2.0 OR ISC OR MIT` |
 | rustls-pemfile | 2.2.0 | `Apache-2.0 OR ISC OR MIT` |
@@ -123,11 +139,15 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | syn | 2.0.119 | `MIT OR Apache-2.0` |
 | syn | 3.0.9 | `MIT OR Apache-2.0` |
 | sync_wrapper | 1.0.2 | `Apache-2.0` |
+| synstructure | 0.13.2 | `MIT` |
 | synstructure | 0.14.0 | `MIT` |
 | tempfile | 3.27.0 | `MIT OR Apache-2.0` |
 | thiserror | 2.0.21 | `MIT OR Apache-2.0` |
 | thiserror-impl | 2.0.21 | `MIT OR Apache-2.0` |
 | thread_local | 1.1.10 | `MIT OR Apache-2.0` |
+| time | 0.3.55 | `MIT OR Apache-2.0` |
+| time-core | 0.1.9 | `MIT OR Apache-2.0` |
+| time-macros | 0.2.32 | `MIT OR Apache-2.0` |
 | tinystr | 0.8.4 | `Unicode-3.0` |
 | tokio | 1.53.2 | `MIT` |
 | tokio-macros | 2.7.2 | `MIT` |
@@ -148,6 +168,7 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | try-lock | 0.2.5 | `MIT` |
 | typenum | 1.20.1 | `MIT OR Apache-2.0` |
 | unicode-ident | 1.0.27 | `(MIT OR Apache-2.0) AND Unicode-3.0` |
+| untrusted | 0.7.1 | `ISC` |
 | untrusted | 0.9.0 | `ISC` |
 | url | 2.5.8 | `MIT OR Apache-2.0` |
 | utf8_iter | 1.0.4 | `Apache-2.0 OR MIT` |
@@ -179,6 +200,7 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | winnow | 0.7.15 | `MIT` |
 | winnow | 1.0.4 | `MIT` |
 | writeable | 0.6.4 | `Unicode-3.0` |
+| x509-parser | 0.18.1 | `MIT OR Apache-2.0` |
 | yoke | 0.8.3 | `Unicode-3.0` |
 | yoke-derive | 0.8.4 | `Unicode-3.0` |
 | zerofrom | 0.1.8 | `Unicode-3.0` |

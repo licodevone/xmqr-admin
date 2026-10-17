@@ -12,6 +12,8 @@
   autorizadas, sem abrir WAL fora do dono.~~
 - [x] ~~A05/A08: auditoria exportável/rotacionável e diagnóstico redigido de
   recuperação, backup, espaço e versões.~~
+- [ ] A12: core pinado no broker 0.23.0, backup/restore offline do estado v10 e
+  perfil de listener explícito; CI pendente. [Evidência](../prompts/registros/A12-core-broker-0.23-compat.md).
 - [ ] Painel de escrita: integração com canal aceito, confirmações/auditoria,
   acesso por função e rotação de credenciais.
 - [ ] Distribuição estendida/serviçoWindows/arm64/acessoHTTPS remoto.

@@ -1,5 +1,9 @@
 # Histórico
 
+## Em desenvolvimento após 0.4.0
+
+- A12: core Git do broker atualizado de `3606ede` (0.11.5) para a fonte exata publicada 0.23.0 (`b884a919`), com estado durável v10 e dependências/licenças revisadas. CLI, canal e painel preservados. Backup/restore continua offline; o perfil de listener deve ser escolhido explicitamente ao reabrir estado restaurado.
+
 ## 0.3.0 — editor offline do bundle seguro
 
 - A06: papéis, grupos, ACLs diretas, vínculos e habilitação/revogação de

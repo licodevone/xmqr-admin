@@ -10,7 +10,7 @@ repository = "https://github.com/licodevone/xmqr-admin"
 readme = "README.md"
 
 [dependencies]
-mqtt-broker = { git = "https://github.com/licodevone/xmqr.git", rev = "3606ede844210997fa733408855099535145ac48" }
+mqtt-broker = { git = "https://github.com/licodevone/xmqr.git", rev = "b884a919f44a3a14c53b973b8a3f3e0aabc663e3" }
 argon2 = "0.5.3"
 axum = "0.8"
 fs2 = "0.4.3"
