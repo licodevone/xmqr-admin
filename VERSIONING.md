@@ -1,5 +1,11 @@
 # Versionamento
 
+Marco candidato 0.10.0: core Git fixado no broker P164 com estado v15,
+compatível com broker 0.29.0. A distribuição dependerá de CI do commit
+exato, pacote, imagem numerada, rollback e hashes remotos. Admin 0.9.0
+transporta backup bruto v15, mas broker 0.28.0 rejeita v15; rollback
+executável requer backup privado v14 anterior. [Nota](docs/releases/0.10.0.md).
+
 Marco publicado 0.9.0: core broker `53d86a7e296c158d9247bc5011dec1da49c39b29`
 e documento v14. Admin 0.8.0 e broker 0.26.0 não reabrem v14; rollback exige
 backup privado v13 anterior à migração. A18 validou backup/restore, CI e

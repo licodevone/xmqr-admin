@@ -1,6 +1,6 @@
 # Histórico
 
-## Em desenvolvimento após 0.9.0
+## 0.10.0 — core broker estado v15 (experimental)
 
 - A19: core do broker P164 fixado por commit imutável, com documento v15 e Will pendente que conserva Message Expiry Interval em backup/verify/restore. Admin 0.9.0 também transporta backup bruto v15, mas broker 0.28.0 não o abre; rollback executável exige backup privado v14 anterior.
 

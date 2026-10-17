@@ -761,8 +761,8 @@ dependencies = [
 
 [[package]]
 name = "mqtt-broker"
-version = "0.28.0"
-source = "git+https://github.com/licodevone/xmqr.git?rev=ee9d41c18ca583e6c34962feab8ceb417a43d968#ee9d41c18ca583e6c34962feab8ceb417a43d968"
+version = "0.29.0"
+source = "git+https://github.com/licodevone/xmqr.git?rev=9215d4c1e6fb59f3ab73d684ecfbaf9ed38e72b2#9215d4c1e6fb59f3ab73d684ecfbaf9ed38e72b2"
 dependencies = [
  "argon2",
  "crc32fast",
@@ -1848,7 +1848,7 @@ dependencies = [
 
 [[package]]
 name = "xmqr-admin"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "argon2",
  "axum",

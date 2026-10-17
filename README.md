@@ -1,6 +1,13 @@
 # XMQR Admin
 
-A árvore após 0.9.0 fixa o broker P164 no commit `ee9d41c18ca583e6c34962feab8ceb417a43d968`
+O candidato experimental 0.10.0 fixa o core do broker P164 para o estado
+MQTT v15 e preserva um Will pendente com Message Expiry em backup offline.
+O broker 0.29.0 é o par; o broker 0.28.0 rejeita v15. A versão 0.9.0 do
+admin copia backup bruto v15, mas não é o par homologado. Para rollback do
+broker, preserve backup privado v14 anterior. O painel segue somente
+leitura. [Nota de release](docs/releases/0.10.0.md).
+
+A árvore após 0.9.0 fixa o broker 0.29.0 no commit `9215d4c1e6fb59f3ab73d684ecfbaf9ed38e72b2`
 para operar com o documento MQTT v15 e preservar, em backup/verify/restore
 offline, um Will pendente com intervalo de validade. O admin 0.9.0 publicado
 também consegue copiar um backup bruto v15 sem interpretar o documento, mas
