@@ -1,6 +1,6 @@
 [package]
 name = "xmqr-admin"
-version = "0.8.0"
+version = "0.9.0"
 edition = "2024"
 rust-version = "1.88"
 publish = false
@@ -10,7 +10,7 @@ repository = "https://github.com/licodevone/xmqr-admin"
 readme = "README.md"
 
 [dependencies]
-mqtt-broker = { git = "https://github.com/licodevone/xmqr.git", rev = "0254a55659b2bdcb02d0abae6057d457e6a49bcf" }
+mqtt-broker = { git = "https://github.com/licodevone/xmqr.git", rev = "53d86a7e296c158d9247bc5011dec1da49c39b29" }
 argon2 = "0.5.3"
 axum = "0.8"
 fs2 = "0.4.3"

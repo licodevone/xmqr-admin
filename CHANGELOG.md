@@ -1,5 +1,10 @@
 # Histórico
 
+## 0.9.0 — core broker 0.27.0 e estado v14 (experimental)
+
+- A18: core Git imutável `53d86a7e296c158d9247bc5011dec1da49c39b29` do broker 0.27.0. Backup/verify/restore offline preserva origem de cópia QoS1 compartilhada redistribuída, Subscription Identifier e fila do membro sobrevivente. Perfil de listener permanece externo e explícito; painel continua somente leitura.
+- Broker 0.26.0/admin 0.8.0 não reabrem v14. Rollback exige backup privado v13 anterior à primeira gravação no broker 0.27.0.
+
 ## 0.8.0 — core broker 0.26.0 e estado v13 (experimental)
 
 - A16: core Git imutável `0254a556` da tag broker 0.26.0; backup/verify/restore offline do estado v13 preserva associação compartilhada durável, identificador de assinatura e entrega QoS2 escolhida. Perfil `.mqtt-broker-profile` externo e explícito; painel somente leitura. Broker 0.25.0/admin 0.7.0 não reabrem v13; rollback exige backup privado v12 anterior à migração.
