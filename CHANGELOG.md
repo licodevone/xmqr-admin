@@ -1,6 +1,6 @@
 # Histórico
 
-## 0.7.0 — core broker 0.25.0 e estado v12 (candidato experimental)
+## 0.7.0 — core broker 0.25.0 e estado v12 (experimental)
 
 - A15: core Git imutável `6462b838` do broker publicado 0.25.0; backup/verify/restore offline de estado v12 preserva Subscription Identifier por assinatura. Perfil `.mqtt-broker-profile` externo e explícito; painel somente leitura. Broker 0.24.0/admin 0.6.0 não reabrem estado v12, que exige backup privado v11 anterior para rollback.
 
