@@ -1,11 +1,11 @@
 # XMQR Admin
 
-O candidato experimental 0.10.0 fixa o core do broker P164 para o estado
+A release experimental 0.10.0 fixa o core do broker P164 para o estado
 MQTT v15 e preserva um Will pendente com Message Expiry em backup offline.
 O broker 0.29.0 é o par; o broker 0.28.0 rejeita v15. A versão 0.9.0 do
 admin copia backup bruto v15, mas não é o par homologado. Para rollback do
 broker, preserve backup privado v14 anterior. O painel segue somente
-leitura. [Nota de release](docs/releases/0.10.0.md).
+leitura. [Release 0.10.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.10.0) e [aceite A20](prompts/registros/A20-release-0.10.0.md).
 
 A árvore após 0.9.0 fixa o broker 0.29.0 no commit `9215d4c1e6fb59f3ab73d684ecfbaf9ed38e72b2`
 para operar com o documento MQTT v15 e preservar, em backup/verify/restore
@@ -13,7 +13,7 @@ offline, um Will pendente com intervalo de validade. O admin 0.9.0 publicado
 também consegue copiar um backup bruto v15 sem interpretar o documento, mas
 o broker 0.28.0 rejeita v15 (`Malformed` no ensaio). Para rollback executável,
 guarde um backup privado v14 anterior à primeira gravação v15. A atualização
-do admin ainda não recebeu tag/release. [Prompt A19](prompts/admin/19-core-v15-compatibility.md).
+do admin foi publicada no marco 0.10.0. [Aceite A19](prompts/registros/A19-core-v15-compatibility.md).
 
 A versão experimental publicada 0.9.0 fixa o core Git do broker 0.27.0 e lê
 estado v14, inclusive origem durável e redistribuição de cópia QoS1
@@ -152,11 +152,11 @@ gestão de sessões/retained. A fase 5 foi aceita no recorte local Linux/WSL
 conforme o [aceite](https://github.com/licodevone/xmqr/blob/main/docs/phase5-acceptance.md).
 O painel web permanece somente leitura; operações online usam o CLI.
 
-`xmqr` contém o broker publicado 0.25.0 e seu utilitário `mqtt-admin` legado.
-Esta versão instala **`xmqr-admin`** 0.9.0 independente, lado a lado.
-`xmqr-client` contém o cliente `mqtt-client` publicado 0.23.0. Nenhum deles é substituído.
-Não é Cargo workspace. Reutilizamos a biblioteca do core por dependênciaGit
-fixada no commit 6462b83858ea5ca57bf13c6e83efa74e4523c637, sem pathdependency.
+`xmqr` contém o broker publicado 0.29.0 e seu utilitário `mqtt-admin` legado.
+Esta versão instala **`xmqr-admin`** 0.10.0 independente, lado a lado.
+`xmqr-client` contém o cliente `mqtt-client` publicado 0.26.0. Nenhum deles é substituído.
+Não é Cargo workspace. Reutilizamos a biblioteca do core por dependência Git
+fixada no commit 9215d4c1e6fb59f3ab73d684ecfbaf9ed38e72b2, sem dependência local.
 [Origem dos arquivos extraídos](ORIGIN.json); [fluxo por prompts](prompts/admin/A00-contexto.md).
 
 ## Compilar no Ubuntu/WSL
