@@ -5,9 +5,9 @@ do mqtt-admin legado dentro do broker. Minor acrescenta fatia; patch corrige
 defeito. Documentação isolada não muda a versão. Tags identificam código aceito
 e não são movidas para incorporar registros de publicação posteriores.
 
-A12 em desenvolvimento após 0.4.0 usa o core Git imutável do broker 0.23.0
-(`b884a919f44a3a14c53b973b8a3f3e0aabc663e3`); a versão própria do admin
-permanece 0.4.0 até um marco de distribuição testado.
+A12 aceito usa o core Git imutável do broker 0.23.0
+(`b884a919f44a3a14c53b973b8a3f3e0aabc663e3`). A13 prepara a versão
+própria 0.5.0; ela só será publicada após os gates de distribuição.
 
 Pedido do mantenedor autoriza commit/push e tags após alterações de código
 validadas; prereleases e distribuição quando o marco estiver pronto. Sequência

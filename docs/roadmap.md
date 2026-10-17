@@ -14,7 +14,7 @@
   recuperação, backup, espaço e versões.~~
 - [x] ~~A12: core pinado no broker 0.23.0, backup/restore offline do estado v10 e
   perfil de listener explícito; CI PASS.~~ [Evidência](../prompts/registros/A12-core-broker-0.23-compat.md).
-- [ ] A13: distribuir admin independente 0.5.0 com core 0.23.0, pacotes e imagem numerados, tag e prerelease verificadas. [Prompt](../prompts/admin/A13-release-core-0.23.md).
+- [ ] A13: distribuir admin independente 0.5.0 com core 0.23.0, pacotes e imagem numerados, tag e prerelease verificadas. [Evidência](../prompts/registros/A13-release-core-0.23.md).
 - [ ] Painel de escrita: integração com canal aceito, confirmações/auditoria,
   acesso por função e rotação de credenciais.
 - [ ] Distribuição estendida/serviçoWindows/arm64/acessoHTTPS remoto.

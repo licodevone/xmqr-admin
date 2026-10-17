@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import subprocess
 import time
+import tomllib
 import uuid
 
 
@@ -31,6 +32,7 @@ def main():
     if args.report.exists():
         parser.error('report exists; choose a new output')
     root = Path(__file__).resolve().parents[1]
+    version = tomllib.loads((root / 'Cargo.toml').read_text(encoding='utf8'))['package']['version']
     name = 'xmqr-a03-' + uuid.uuid4().hex[:12]
     volume, broker, admin = name + '-work', name + '-broker', name + '-admin'
     owned_containers, created = [], False
@@ -41,9 +43,9 @@ def main():
         assert image['Os'] == 'linux' and image['Architecture'] == 'amd64'
         assert config['User'] == '10001:10001' and config['StopSignal'] == 'SIGTERM'
         assert config['Entrypoint'] == ['/usr/local/bin/xmqr-admin']
-        assert config['Labels']['org.opencontainers.image.version'] == '0.1.0'
+        assert config['Labels']['org.opencontainers.image.version'] == version
         assert config['Labels']['org.opencontainers.image.revision'] == args.revision
-        assert docker('run', '--rm', '--network', 'none', '--read-only', '--cap-drop=ALL', args.admin_image, '--version').stdout.strip() == b'xmqr-admin 0.1.0'
+        assert docker('run', '--rm', '--network', 'none', '--read-only', '--cap-drop=ALL', args.admin_image, '--version').stdout.strip() == f'xmqr-admin {version}'.encode()
         docker('run', '--rm', '--network', 'none', '--read-only', '--cap-drop=ALL', '--entrypoint', 'sh', args.admin_image, '-c', 'test ! -e /usr/local/bin/mqtt-broker && test ! -e /usr/local/bin/mqtt-client')
         checks.append('dedicated non-root immutable-version image, no broker/client executable')
         docker('volume', 'create', volume)

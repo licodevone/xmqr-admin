@@ -1,8 +1,9 @@
 # Histórico
 
-## Em desenvolvimento após 0.4.0
+## 0.5.0 — core broker 0.23.0 (candidato experimental)
 
 - A12: core Git do broker atualizado de `3606ede` (0.11.5) para a fonte exata publicada 0.23.0 (`b884a919`), com estado durável v10 e dependências/licenças revisadas. CLI, canal e painel preservados. Backup/restore continua offline; o perfil de listener deve ser escolhido explicitamente ao reabrir estado restaurado.
+- A13: binário, pacote Ubuntu26 amd64 e imagem numerada passam a distribuir esse core após gates e publicação do marco. Painel somente leitura; sem promessa de migração de perfil de listener.
 
 ## 0.3.0 — editor offline do bundle seguro
 
