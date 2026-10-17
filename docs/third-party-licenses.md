@@ -87,7 +87,7 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | mime | 0.3.17 | `MIT OR Apache-2.0` |
 | minimal-lexical | 0.2.1 | `MIT/Apache-2.0` |
 | mio | 1.2.4 | `MIT` |
-| mqtt-broker | 0.23.0 | `MIT` |
+| mqtt-broker | 0.24.0 | `MIT` |
 | nom | 7.1.3 | `MIT` |
 | nu-ansi-term | 0.50.3 | `MIT` |
 | num-bigint | 0.4.8 | `MIT OR Apache-2.0` |
