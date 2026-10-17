@@ -1,10 +1,11 @@
 # XMQR Admin
 
-A árvore candidata 0.9.0 fixa o core Git do broker 0.27.0 e lê estado v14,
-inclusive origem durável e redistribuição de cópia QoS1 compartilhada. O ensaio
-offline [A18](prompts/registros/A18-core-v14-release-0.9.md) passou; a release
-aguarda CI, pacote, imagem e verificação remota. Preserve backup privado v13
-antes da primeira gravação pelo broker 0.27.0 para poder voltar a 0.8.0.
+A versão experimental publicada 0.9.0 fixa o core Git do broker 0.27.0 e lê
+estado v14, inclusive origem durável e redistribuição de cópia QoS1
+compartilhada. [A18](prompts/registros/A18-core-v14-release-0.9.md) registra
+CI, ensaio offline, pacote, imagem e anexos remotos. Preserve backup privado
+v13 antes da primeira gravação pelo broker 0.27.0 para poder voltar a 0.8.0.
+[Release v0.9.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.9.0).
 
 A versão experimental publicada 0.8.0 fixa o core Git da tag broker 0.26.0
 para ler estado v13, incluindo associação compartilhada durável e entrega QoS2
@@ -137,7 +138,7 @@ conforme o [aceite](https://github.com/licodevone/xmqr/blob/main/docs/phase5-acc
 O painel web permanece somente leitura; operações online usam o CLI.
 
 `xmqr` contém o broker publicado 0.25.0 e seu utilitário `mqtt-admin` legado.
-Esta árvore candidata instala **`xmqr-admin`** 0.9.0 independente, lado a lado.
+Esta versão instala **`xmqr-admin`** 0.9.0 independente, lado a lado.
 `xmqr-client` contém o cliente `mqtt-client` publicado 0.23.0. Nenhum deles é substituído.
 Não é Cargo workspace. Reutilizamos a biblioteca do core por dependênciaGit
 fixada no commit 6462b83858ea5ca57bf13c6e83efa74e4523c637, sem pathdependency.

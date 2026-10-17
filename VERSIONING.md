@@ -1,9 +1,9 @@
 # Versionamento
 
-Marco candidato 0.9.0: core broker `53d86a7e296c158d9247bc5011dec1da49c39b29`
+Marco publicado 0.9.0: core broker `53d86a7e296c158d9247bc5011dec1da49c39b29`
 e documento v14. Admin 0.8.0 e broker 0.26.0 não reabrem v14; rollback exige
-backup privado v13 anterior à migração. A18 valida backup/restore, mas CI e
-distribuição do commit exato ainda são gates da release.
+backup privado v13 anterior à migração. A18 validou backup/restore, CI e
+distribuição do commit exato. [Nota de release](docs/releases/0.9.0.md).
 
 Admin independente: v0.1.0 inicial, binárioxmqr-admin. Não corresponde à versão
 do mqtt-admin legado dentro do broker. Minor acrescenta fatia; patch corrige
