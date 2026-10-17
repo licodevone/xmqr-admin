@@ -104,6 +104,13 @@ O crate valuable0.1.1 omite seu LICENSE: incluímos o original do
 fixado pela metadata Cargo. O complemento local é validado pelo SHA256 e o
 coletor continua offline, sem fabricar licença de dependência.
 
+O crate `asn1-rs-impl` 0.2.0 também omite os arquivos de licença no archive.
+O complemento conserva `LICENSE-MIT` e `LICENSE-APACHE` da raiz do
+[commit de origem](https://github.com/rusticata/asn1-rs/tree/a20e5f7319c896737ad0f2557037817b91ad854f),
+que corresponde ao `path_in_vcs=impl` do crate. Os blobs e SHA256 foram
+conferidos antes da inclusão; o coletor exige versão, revisão, repositório e
+declaração de licença exatos.
+
 Os importadores winapi Windows0.4.0 também omitem textos no archive. O superset
 conserva LICENSE-MIT/APACHE do winapi0.3.9 do mesmo lock/repositório e registra
 esse donor explicitamente; não infere que donor e importadores têm o mesmo commit

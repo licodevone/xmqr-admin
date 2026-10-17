@@ -75,7 +75,10 @@ class DistributionContract(unittest.TestCase):
         allowed = {'!Cargo.toml', '!Cargo.lock', '!Dockerfile', '!.dockerignore', '!LICENSE',
                    '!ORIGIN.json', '!src/', '!src/**', '!assets/', '!assets/**', '!scripts/',
                    '!scripts/collect_notices.py', '!docs/', '!docs/third-party-licenses.md',
-                   '!packaging/', '!packaging/notices/', '!packaging/notices/valuable-0.1.1/',
+                   '!packaging/', '!packaging/notices/', '!packaging/notices/asn1-rs-impl-0.2.0/',
+                   '!packaging/notices/asn1-rs-impl-0.2.0/LICENSE-MIT',
+                   '!packaging/notices/asn1-rs-impl-0.2.0/LICENSE-APACHE',
+                   '!packaging/notices/valuable-0.1.1/',
                    '!packaging/notices/valuable-0.1.1/LICENSE'}
         self.assertEqual({r for r in rules if r.startswith('!')}, allowed)
         for exclusion in ('**/.env*', '**/*.key', '**/*.pem', '**/*.crt', '**/*.wal', '**/*.token', '**/users.toml'):
@@ -97,6 +100,13 @@ class DistributionContract(unittest.TestCase):
     def test_valuable_supplement_matches_original_commit_hash(self):
         self.assertEqual(NOTICES.digest(ROOT / 'packaging/notices/valuable-0.1.1/LICENSE'),
                          'ed60d479b8fd1f64e9cbc3de449a16a53ac1b3d1b6aeb9bf9d190a8e93061b44')
+
+    def test_asn1_impl_supplement_matches_original_commit_hashes(self):
+        base = ROOT / 'packaging/notices/asn1-rs-impl-0.2.0'
+        self.assertEqual(NOTICES.digest(base / 'LICENSE-MIT'),
+                         'a5c61b93b6ee1d104af9920cf020ff3c7efe818e31fe562c72261847a728f513')
+        self.assertEqual(NOTICES.digest(base / 'LICENSE-APACHE'),
+                         'a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2')
 
     def test_unknown_missing_notice_has_no_generic_fallback(self):
         with self.assertRaises(ValueError):

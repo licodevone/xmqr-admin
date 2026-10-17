@@ -62,6 +62,23 @@ def notice_paths(package):
 
 def supplement_paths(root, package, packages):
     key = package['name'], package['version']
+    if key == ('asn1-rs-impl', '0.2.0'):
+        commit = 'a20e5f7319c896737ad0f2557037817b91ad854f'
+        repository = 'https://github.com/rusticata/asn1-rs.git'
+        vcs = json.loads((Path(package['manifest_path']).parent / '.cargo_vcs_info.json').read_text())
+        if (vcs['git']['sha1'] != commit or vcs.get('path_in_vcs') != 'impl'
+                or package.get('repository') != repository
+                or package.get('license') not in ('MIT/Apache-2.0', 'MIT OR Apache-2.0')):
+            raise ValueError('asn1-rs-impl supplement source/license mismatch')
+        base = root / 'packaging/notices/asn1-rs-impl-0.2.0'
+        hashes = {'LICENSE-MIT': 'a5c61b93b6ee1d104af9920cf020ff3c7efe818e31fe562c72261847a728f513',
+                  'LICENSE-APACHE': 'a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2'}
+        selected = [base / name for name in hashes]
+        if any(path.is_symlink() or not path.is_file() or digest(path) != hashes[path.name]
+               for path in selected):
+            raise ValueError('asn1-rs-impl original license hash mismatch')
+        return base, selected, {'source_revision': commit, 'repository': repository,
+                                'scope': 'original root licenses at crate source revision; impl archive omits them'}
     if key == ('valuable', '0.1.1'):
         vcs = json.loads((Path(package['manifest_path']).parent / '.cargo_vcs_info.json').read_text())
         commit = '9efc29b6e58cef28f6566a47aa7e142a55fead77'

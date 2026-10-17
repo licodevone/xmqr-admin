@@ -16,6 +16,9 @@
 !docs/third-party-licenses.md
 !packaging/
 !packaging/notices/
+!packaging/notices/asn1-rs-impl-0.2.0/
+!packaging/notices/asn1-rs-impl-0.2.0/LICENSE-MIT
+!packaging/notices/asn1-rs-impl-0.2.0/LICENSE-APACHE
 !packaging/notices/valuable-0.1.1/
 !packaging/notices/valuable-0.1.1/LICENSE
 **/.env*
