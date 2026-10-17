@@ -1,11 +1,11 @@
 # XMQR Admin
 
-A versão experimental 0.7.0 fixa o core Git da tag broker 0.25.0 para ler estado v12,
-incluindo Subscription Identifier MQTT 5 persistido por assinatura. Pacote e
-imagem estão na [release 0.7.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.7.0);
-[A15](prompts/registros/A15-core-v12-release-0.7.md) registra os gates.
+A versão candidata experimental 0.8.0 fixa o core Git da tag broker 0.26.0
+para ler estado v13, incluindo associação compartilhada durável e entrega QoS2
+escolhida. [A16](prompts/registros/A16-core-v13-release-0.8.md) registra os gates.
 O backup segue offline e não contém `.mqtt-broker-profile`; para rollback do
-estado v12, preserve antes da migração um backup privado v11.
+estado v13, preserve antes da migração um backup privado v12. A distribuição
+0.8.0 aguarda todos os gates e a conferência dos artefatos remotos.
 
 O marco experimental publicado 0.4.0 reúne editor offline do bundle seguro, CLI do canal
 administrativo local, auditoria e diagnóstico de recuperação. O painel web
@@ -83,7 +83,7 @@ existentes, consulta prontidão/versão, mede espaço livre (piso de 16 MiB) e
 retorna JSON sem caminhos ou segredos. Crie o backup offline com broker parado.
 
 Administração independente do ecossistema XMQR, em Rust, com CLI e painel web
-local. Versão publicada **0.7.0 experimental**. Licença própria MIT.
+local. Versão candidata **0.8.0 experimental**; última publicação 0.7.0. Licença própria MIT.
 
 [Release v0.1.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.1.0)
 publicada com `.deb`/tar Ubuntu26amd64, exportDocker, hashes e evidências.

@@ -1,6 +1,6 @@
 # Distribuição experimental
 
-O marco atual é [v0.7.0 experimental](https://github.com/licodevone/xmqr-admin/releases/tag/v0.7.0):
+O marco publicado é [v0.7.0 experimental](https://github.com/licodevone/xmqr-admin/releases/tag/v0.7.0):
 pacote Ubuntu 26.04 amd64 `xmqr-admin_0.7.0-1_amd64.deb`, tar e imagem
 `lepinheiro100/xmqr-admin-ui:0.7.0`. Seus hashes e gates estão no
 [registro A15](../prompts/registros/A15-core-v12-release-0.7.md). Para conferir a
@@ -9,6 +9,11 @@ estado v12 exige broker parado; o marcador `.mqtt-broker-profile` deve ser
 escolhido e verificado separadamente na restauração. Os comandos 0.1.0 abaixo
 documentam o primeiro marco histórico e continuam úteis como modelo para
 construções locais, ajustando a versão de saída.
+
+O candidato 0.8.0 usa o core broker 0.26.0 e estado v13. Pacote, imagem,
+tag e prerelease dependem dos gates [A16](../prompts/registros/A16-core-v13-release-0.8.md).
+Preserve um backup privado v12 antes da primeira gravação v13; downgrade de
+pacote não converte estado.
 
 O `xmqr-admin` é independente do broker e do `mqtt-admin` legado. O pacote novo
 não remove nem substitui esse binário. A distribuição só é aceita depois dos

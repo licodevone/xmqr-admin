@@ -17,6 +17,7 @@
 - [x] ~~A13: distribuir admin independente 0.5.0 com core 0.23.0, pacotes e imagem numerados, tag e prerelease verificadas.~~ [Evidência](../prompts/registros/A13-release-core-0.23.md).
 - [x] ~~A14: alinhar core à release broker 0.24.0/estado v11 e distribuir admin 0.6.0 após gates próprios.~~ [Evidência](../prompts/registros/A14-core-v11-release-0.6.md).
 - [x] ~~A15: alinhar core à release broker 0.25.0/estado v12 e distribuir admin 0.7.0 após gates próprios.~~ [Evidência](../prompts/registros/A15-core-v12-release-0.7.md). Painel de escrita e distribuição estendida seguem abertos.
+- [ ] A16: alinhar core à release broker 0.26.0/estado v13 e distribuir admin 0.8.0 após gates próprios. [Registro](../prompts/registros/A16-core-v13-release-0.8.md).
 - [ ] Painel de escrita: integração com canal aceito, confirmações/auditoria,
   acesso por função e rotação de credenciais.
 - [ ] Distribuição estendida/serviçoWindows/arm64/acessoHTTPS remoto.
