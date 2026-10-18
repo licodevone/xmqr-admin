@@ -45,3 +45,16 @@ Collector SHA2568772f4f8ec62291cb4fb47c6d2dc3d380c61acdfc0da93b6e70f3b7cdc7e9afd
 contrato novo SHA256cf7d2d104727e0798af38c6543038748d28a14f7ee3ac80d3a181abeef21938d.
 11contratosdistribuição/3export/actionlint1.7.12 PASS após o fix. Nova CI da
 fonte exata ainda necessária; não há tag, .deb ou imagem011 publicados.
+
+## Aviso de artefato A21 detectado antes da publicação
+
+Run39141889950/sourcefe8cff5, core-v16 PASS, mas upload-artifactv4 avisou que
+.evidence/*.json não encontrou arquivos. A21 imprime JSON/marker somente
+após escrever o relatório; action.yml oficial do action consultado viaAPI
+explicita include-hidden-files=false por padrão. O aviso é de transporte de
+evidência, não FAIL do protocolo. Sem aceitar anexo inexistente.
+
+PromptA22v1.4 precede seleção do único .evidence/a21-v16.json sanitizado,
+inclusão explícita de ocultos e erro obrigatório por ausência. Upload nativo
+também exige arquivos, sem fallback. Nova fonte requer CI e download real
+dos anexos. Nenhum runtime/Cargo/ELF alterado.

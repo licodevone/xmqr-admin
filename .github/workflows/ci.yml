@@ -74,7 +74,9 @@ jobs:
         if: always()
         with:
           name: admin-v16-evidence
-          path: .evidence/*.json
+          path: .evidence/a21-v16.json
+          include-hidden-files: true
+          if-no-files-found: error
 
   ubuntu-package:
     runs-on: ubuntu-latest
@@ -97,6 +99,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: admin-ubuntu26-amd64
+          if-no-files-found: error
           path: |
             dist/ci-native/*.deb
             dist/ci-native/*.tar.gz
