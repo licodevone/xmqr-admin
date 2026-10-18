@@ -127,3 +127,43 @@ Fixturev15 histórica continua intocada, SHA256 debda739946a63c1fc17586cf3b60995
 Os relatórios locais ignorados foram preservados; não se anexa estado bruto.
 Cargo, runtime, pin, CI, versão e publicação não foram alterados por este
 agente. Aguardar os três ELFs congelados para executar a fixture completa.
+
+## Execução A21 v1.4 — compatibilidade nativa16 aprovada antes do bump
+
+2026-10-18, clone próprio p227-admin-release011/base0612c48. Prompt04ad140
+antecedeu pinCargo; A22c7606b1 planejou distribuição sem bump antecipado.
+Core público ba6ef50204dec2c6385b272e595260b9def1e794 (broker043/estado16),
+confirmado via GitHub; Cargo.lock gerado por cargo update -p mqtt-broker.
+Somente core029→043 e23novos pacotes transitivos necessários ao core atual;
+dependências existentes não foram atualizadas por conveniência. Inventário
+gerado/revisado e --check PASS, atribuições MIT/terceiros preservadas.
+
+Admin ainda010 durante estes gates; nenhum arquivo src mudou. Rust1.99.0,
+Ubuntu26/WSL, cache próprio /var/tmp, locked/offline/j1. Git autocrlf apenas
+no clone para interpretação Windows/WSL, nenhuma configuração global.
+
+| Gate | Resultado |
+| --- | --- |
+| Cargo test integral |27PASS=21unit+3bundle+3CLI,0ignored; compile179s,unit13.11s,bundle1.92s,CLI0.08s |
+| Cargo build debug locked/offline |PASS17.30s |
+| Fmt e Clippy all-targets -Dwarnings |PASS; Clippy61s |
+| Contratos A21 |9PASS0.452s; não são os casos MQTT |
+| Contratos distribuição/export |11PASS0.038s e3PASS0.001s |
+| [A21 real completo](../../docs/evidence/admin-a21-native16-pin010.json) |9/9PASS3.1947s, A21_CORE_V16_EXPIRY_PASS |
+| Canal administrativo com broker043 |CHANNEL_CLI_PASS, processo real isolado |
+
+ELFs explícitos: broker043 fce0b871be72e5cfc7eb5a8dc46d04280075dd21dbbbb5b3677676952c6e9257;
+admin010 pinado6151a680d52356020e496f7f1103298909b2f4f63ff39eff0799f2503f1a8d37;
+legadoD042/v15 dca22b2624b7f36175d4e939c640b6f5730220bcc9510580eef9054a6af8ef57.
+Harness b6a07b5f93260cf081b31e2b3669ab98b159156f1f4deda2a7109478386c31f8
+permaneceu intacto, assim como a fixture histórica v15.
+
+Native16 preservou watermark/intervalos originais31 e Will pendente120/37;
+backup/restore preservaram bytes e manifesto, sem marcador de perfil embutido.
+Broker15 recusou16 sem alterar snapshot/WAL. Migração de estado15 REAL para16
+não inventou intervalo original ausente; MQTT após ambos restores entregou
+bytes/QoS/expiração31. Negativos de estado ativo, lock, destino, corrupção e
+symlinks passaram. Nada do operador foi aberto/instalado/iniciado.
+
+Compatibilidade funcional local A21 aceita; distribuição A22/versão011 ainda
+é etapa separada. Não fecha fase6 global nem prova powerloss/produção.

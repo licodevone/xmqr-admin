@@ -1,0 +1,70 @@
+{
+  "scope": "owned Linux loopback resources; no power-loss claim or operator data",
+  "harness_sha256": "b6a07b5f93260cf081b31e2b3669ab98b159156f1f4deda2a7109478386c31f8",
+  "cases": [
+    {
+      "case": "native_v16_seed_and_active_lock",
+      "status": "PASS"
+    },
+    {
+      "case": "native_backup_verify_restore_bytes",
+      "status": "PASS",
+      "state_sha256": {
+        "state.snapshot": "d49a0cfb19827551ccb4e935ec786b1c524a5b8a61ef332a3138aa54963e1fb5",
+        "state.wal": "eb77c1a9d4deabfbb19fefc88a43d1843d11228a5f414c66fbfd4aa14b2a38eb"
+      }
+    },
+    {
+      "case": "legacy_refuses_v16_without_state_change",
+      "status": "PASS"
+    },
+    {
+      "case": "native_mqtt_after_restore",
+      "status": "PASS",
+      "offline_remaining_seconds": 31,
+      "retained_remaining_seconds": 31
+    },
+    {
+      "case": "negative_lock_destination_corruption_symlink",
+      "status": "PASS"
+    },
+    {
+      "case": "real_legacy_v15_seed",
+      "status": "PASS"
+    },
+    {
+      "case": "legacy_backup_verify_restore_bytes",
+      "status": "PASS",
+      "state_sha256": {
+        "state.snapshot": "a098f44acf3f53f0f17d7b13271cfccafe493e7492bd080e1c75702b003fa40e",
+        "state.wal": "eb77c1a9d4deabfbb19fefc88a43d1843d11228a5f414c66fbfd4aa14b2a38eb"
+      }
+    },
+    {
+      "case": "legacy_to_v16_without_invented_original",
+      "status": "PASS"
+    },
+    {
+      "case": "migrated_mqtt_after_restore",
+      "status": "PASS",
+      "offline_remaining_seconds": 31,
+      "retained_remaining_seconds": 31
+    }
+  ],
+  "binaries": {
+    "broker": {
+      "version": "mqtt-broker 0.43.0",
+      "sha256": "fce0b871be72e5cfc7eb5a8dc46d04280075dd21dbbbb5b3677676952c6e9257"
+    },
+    "admin": {
+      "version": "xmqr-admin 0.10.0",
+      "sha256": "6151a680d52356020e496f7f1103298909b2f4f63ff39eff0799f2503f1a8d37"
+    },
+    "legacy_broker": {
+      "version": "mqtt-broker 0.42.0",
+      "sha256": "dca22b2624b7f36175d4e939c640b6f5730220bcc9510580eef9054a6af8ef57"
+    }
+  },
+  "status": "PASS",
+  "elapsed_seconds": 3.1947
+}
