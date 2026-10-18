@@ -109,3 +109,17 @@ locked reais. Depois, testar origem/hash/licença/repositório/versão e symlink
 negativos; incluir os contratos no CI. Repetir collector completo em saída
 nova e guardar contagens/hashes. A fonte exata corrigida exige CI completo
 novo e proveniência de pacotes/Hub; ELFs funcionais anteriores ficam intactos.
+
+## v1.4 — evidência oculta não anexada pelo CI
+
+Antes de publicar, run39141889950/core-v16 PASS produziu aviso "No files
+were found" no upload .evidence/*.json. action.yml oficial de upload-artifact
+v4 confirma include-hidden-files=false por padrão. Isto é ausência de anexo,
+não falha MQTT/A21, e não permite declarar evidência remota verificada.
+
+Selecionar apenas o relatório sanitizado exato .evidence/a21-v16.json,
+include-hidden-files=true e if-no-files-found=error. Não incluir outros
+arquivos ocultos, logs, tokens ou fixtures. Pacotes nativos também exigem
+if-no-files-found=error. Conferir actionlint, CI exata e baixar o anexo para
+validar status/nove casos/identidades; registrar o aviso anterior sem apagá-lo.
+Sem alterar runtime, Cargo, lock ou ELFs congelados.
