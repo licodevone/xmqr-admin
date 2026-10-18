@@ -1,0 +1,21 @@
+{
+  "status": "FAIL",
+  "date": "2026-10-18",
+  "source_revision": "2f3609fb3e09bf54bc16ed38f0c57eb36b6edac9",
+  "harness": "scripts/verify_channel_cli.py",
+  "harness_sha256": "c67495d4c61637d8469590b5a270a82587db32001a0819f9ae651f8cd4fb79ab",
+  "broker_sha256": "fce0b871be72e5cfc7eb5a8dc46d04280075dd21dbbbb5b3677676952c6e9257",
+  "admin_sha256": "90dfc90ae0e05669c6ecc2f3db87a30d66823f29a10d5317194583fea2e94e43",
+  "admin_provenance": "native Ubuntu26 release binary extracted from exact-source CI package; not the local debug binary",
+  "exit_code": 1,
+  "primary_stage": "mqtt_connect_result(new-after-restart)",
+  "primary_error": "ConnectionRefusedError",
+  "cleanup_error": "AssertionError from stop requiring exit0 and socket removal",
+  "broker_exit_code": null,
+  "limits": [
+    "The combined stop assertion did not disclose the broker exit code; no specific code is inferred.",
+    "Startup socket visibility before MQTT readiness is a code-supported hypothesis, not yet a measured causal result.",
+    "CI for this exact source passed separately; that does not erase this local failure.",
+    "Owned temporary loopback fixture only; no operator data, token values or raw broker logs retained."
+  ]
+}

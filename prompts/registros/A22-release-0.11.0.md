@@ -58,3 +58,37 @@ PromptA22v1.4 precede seleção do único .evidence/a21-v16.json sanitizado,
 inclusão explícita de ocultos e erro obrigatório por ausência. Upload nativo
 também exige arquivos, sem fallback. Nova fonte requer CI e download real
 dos anexos. Nenhum runtime/Cargo/ELF alterado.
+
+## CI2f e pacote nativo — PASS; reexecução do canal — FAIL separado
+
+Run39142145338/source2f3609fb3e09bf54bc16ed38f0c57eb36b6edac9 completo
+SUCCESS nos3jobs. AnexoA21 baixado:9/9PASS, harnessb6a07b5f igual à fonte,
+versões043/011/legacy042. Manifest nativo: source2f/coreba6/draftfalse,
+225dependências/418notices. .deb fba58aa6dd2d5c958f704f9f39dd73e537170d61afa351db65d11429c718488d
+(1301328bytes); tar4b8a9f1e43a6b7acef9ff05582f5601afc957f2029b02760b8905aedea67581d
+(1705044bytes). Checksums/sidecars, caminhos/links, ownership/permissões,
+proveniência/lock e418textos de tar/deb conferidos PASS independentemente.
+
+ELFreleaseCI90dfc90ae0e05669c6ecc2f3db87a30d66823f29a10d5317194583fea2e94e43
+executou --version011 e A21real9/9 em3.269s com brokerfce/legacyD. Ciclos
+Ubuntu26 descartáveis:010→011→010→remove/purge PASS e revisão011-1→2→1→remove
+PASS, preservando hashes/permissões do token/fixture e nome legado. Revisão2
+foi criada com --skip-build/ELFCI e não será publicada. Nada instalado no host.
+
+Depois, canalCLI adicional com esse ELFrelease e brokerdebugfce retornou1:
+ConnectionRefusedError em new-after-restart seguido por AssertionError em
+cleanup. [FAIL sanitizado preservado](../../docs/evidence/admin-a22-channel-restart-fail.json).
+Promptv1.5/b4a23a4 precede diagnóstico instrumentado, ainda sem fix. Não
+classificar readiness/exitcode antes de evidência, nem publicar com esse gate
+pendente. Fonte/ELFs/pacotesCI anteriores permanecem imutáveis.
+
+Diagnóstico posterior sem editar o harness:15execuções completas PASS,
+75start/stop com exit0/socket removido. Wrappers observaram apenas tempo,
+status e flags de logs, sem inserir espera/retry ou mudar os oráculos.
+Starts observaram admin.sock em aproximadamente0.405–0.600s. A falha original
+não reapareceu; ausência de RUST_LOG deixou as flags de listener/shutdown
+false, portanto não permite inferir esses estágios. Isto não prova a causa
+do FAIL anterior nem a corrige retroativamente. Nenhum fix de readiness foi
+aplicado. Próximo recorte: contrato determinístico de socketadmin disponível
+antes da respostaMQTT, seguido de gate de resposta dentro do prazo e cleanup
+que preserve a exceção primária. Publicação011 continua retida por esse gate.
