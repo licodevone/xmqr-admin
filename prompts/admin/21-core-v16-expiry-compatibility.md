@@ -111,3 +111,25 @@ extra no dict aninhado do selftest anterior; unittest parou com SyntaxError,
 exit1 antes de coletar testes. Corrigir somente essa sintaxe e repetir os
 mesmos nove contratos e seed15; não chamar erro de import de regressão no
 broker nem apagar o FAIL anterior. Oráculos e escopo v1.2 preservados.
+
+## v1.4 — execução autorizada com core público final
+
+Core funcional público confirmado pelo coordenador e API GitHub:
+ba6ef50204dec2c6385b272e595260b9def1e794 (broker043/estado16).
+Admin0612c48 limpo; clone novo `.artifacts/p227-admin-release011`, branch
+release/0.11.0. Não alterar broker/client/originalC128. Cargo/lock primeiro
+com admin010, sem bump antes do aceite A21 real. Atualizar lock pelo Cargo
+para o pin exato, sem pathdependency nem atualização ampla por conveniência.
+
+Cache e target próprios `/var/tmp/xmqr-admin-a22-native`, um job; Rust1.99
+explícito e TMPDIR=/var/tmp. Configuração Git somente local ao clone pode
+normalizar a interpretação CRLF/filemode para status limpo entre Windows/WSL;
+nada global. Inventário deve refletir o lock realmente resolvido. Licenças e
+atribuições originais mantidas; licença MIT própria não relicencia dependências.
+
+Aguardar ELF16/hash do coordenador. Legado15 congelado é P227D042,
+SHA dca22b2624b7f36175d4e939c640b6f5730220bcc9510580eef9054a6af8ef57;
+não usar como nativo16. Fixture existente9casos e9contratos, CLI canal
+com broker novo, Rustfmt/test/Clippy/build e inventário/contratos de distribuição.
+Relatórios exclusivos preservam falhas. Se adaptação de API ou fixture for
+necessária, revisar prompt antes de corrigir; não relaxar watermark/TTL/QoS.
