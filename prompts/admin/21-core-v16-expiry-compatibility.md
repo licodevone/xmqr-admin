@@ -1,4 +1,4 @@
-# A21 v1.1 — compatibilidade com expiração durável v16
+# A21 v1.2 — compatibilidade com expiração durável v16
 
 Preparado em2026-10-18 antes de alterar Cargo/código. Pedido: concluir fase6
 dos três sistemas, mantendo prompts, testes, commits e distribuição próprios.
@@ -78,3 +78,26 @@ Contratos unittest ficam no próprio script: parser truncado/CRC/duplicata/
 trailing/bounds, propriedades MQTT e manifesto adulterado. Contratos ou
 --help/AST não são wirePASS. Aguardar ELF16 e admin pinado do coordenador
 para executar integração; não instalar nem compilar por esta fixture.
+
+## Revisão v1.2 — validar a representação persistida antes do oráculo
+
+Review do coordenador encontrou possível erro na fixture: o serializer
+hex_bytes do broker grava payload como string hexadecimal, mas a primeira
+check_document e seu selftest construíam listas de inteiros. Esses oito
+contratos não demonstravam correspondência com um snapshot real.
+
+Antes da correção, produzir seed privado com o ELF P227D legado congelado,
+SHA256 dca22b2624b7f36175d4e939c640b6f5730220bcc9510580eef9054a6af8ef57,
+e admin0.10 existente, conferir documento15/original ausente e executar
+check_document(document,15,None). Preservar resultado real FAIL, se houver,
+em relatório novo sanitizado com hashes, tipos e motivo, sem dump de estado
+ou payload. Não chamar isto de teste de execução do formato16.
+
+Se confirmado, corrigir apenas representação no oráculo: exigir string hex
+de comprimento par, caracteres0-9a-f, limite explícito e bytes decodificados
+iguais aos sintéticos enviados. Recusar lista, espaços, sinal, hex inválido,
+ímpar e bytes diferentes. Selftest estruturado deve usar literais hex
+independentes atravessando parser snapshot/TOML, não repetir list(payload).
+Manter v15/16/intervalos e negativos anteriores, repetir contratos e seed15
+em relatório GREEN separado. Nenhum runtime, Cargo, pin, CI ou serviço real
+é alterado; integração16 permanece NOT_RUN até ELFs do coordenador.
