@@ -1,4 +1,4 @@
-# A22 — candidato admin0.11.0
+# A22 — admin0.11.0 publicado
 
 2026-10-18, clone próprio/base0612c48, branchrelease/0.11.0. Prompts A21v1.4
 04ad140 e A22v1.1 c7606b1 precederam mudanças. A21pin e3723b6 aceito com
@@ -113,3 +113,47 @@ causal retroativa. Fonte final será novamente exercitada e exigirá CI/pacotes
 próprios; artefatos2f permanecem históricos. Hashes finais dos helpers:
 verify_channel_cli.py d27d67d556b7292827ca8d548765620e9023286729f49db9e22b09f0fa3a3e14,
 test_channel_lifecycle.py6fe70557ba366e9dc8d44c10cfffca34aa4e7fc1d2b26c8012eac9b71d850a57.
+
+## Fonte final4483 — gates e publicação verificados
+
+Fonte imutável4483a356196db93f99340bc7aa3b3cabfc4af810, [CI39143572778
+SUCCESS3/3](https://github.com/licodevone/xmqr-admin/actions/runs/39143572778):
+27Rust(21+3+3), fmt/Clippyalltargets/release/inventory;33contratosPython
+(11distribuição+7notices+12lifecycle+3export),9contratosA21,9casosreais e
+canalCLI. ArtefatoCIUbuntu26 e anexoA21 baixados; source4483/coreba6/draftfalse
+verificados. Nenhum teste ignorado no conjunto próprio do admin.
+
+Quatro smokes finais do canal (dois com admin732debug/dois90dfrelease) PASS;
+A21 com ELFrelease extraído do pacote final:9/9PASS em3.1584s. Dois ciclos
+finais descartáveis, usando o pacote exato4483:010→011→010→remove/purge e
+011rev1→2→1→remove PASS, conservando token0600/fixture/legacy. Revisão2 apenas
+teste, não publicada. Conteúdo, ownership/modos, ausência de scripts/serviços,
+sidecars e418notices de tar/deb conferidos independentemente.
+
+Docker compilado separadamente Bookworm-j1, sem ELFUbuntu copiado:
+ELF31cc950e06dbd4347cab3f84ae1cc5844cba9e2286ac98f52231267717890bc5;
+native90dfc90ae0e05669c6ecc2f3db87a30d66823f29a10d5317194583fea2e94e43.
+225dependências/418textos originais, manifest72d2fee4 igual ao nativo.
+ADMIN_DOCKER_PASS15 local e os mesmos15 novamente após pull pelo digestHub;
+não contar como30cenários distintos. Fixtures usaram brokerE48b7855e e
+client038b025a82a em namespace/volume privados, sem portas publicadas.
+
+Hub numérico `lepinheiro100/xmqr-admin-ui:0.11.0`, digest remoto
+`sha256:eadbf642fc99a1e6eb5ad15a020a211c31c1637f575f52c75617919af107b007`,
+inspeção/pull/versão e smoke verificados. Tag anotada imutávelv0.11.0:
+objeto69aa486bb2c68d3b24de34f6095f4ecc7193bcac → source4483. [Prerelease](https://github.com/licodevone/xmqr-admin/releases/tag/v0.11.0)
+com14anexos baixados novamente em pasta nova: nomes, tamanhosAPI, bytes/SHA,
+sidecars e manifestos iguais aos locais (A22_REMOTE_HASH_SIZE_PASS14).
+
+.deb finalSHAfe03ffc858e7583e7d8ce6808b4f56495c688beb69d47870db7fe0c1b8b55469,
+1301324bytes; taradde78e36462f470026baf2406600f7fd1ce211e14ef4bf5f0fe0b6cb251ce31,
+1705041bytes. Dockerarchivefb1300e62da0cddbcd2865f3701e0e9a3c54489137930a12fbe30fb67cc3c9c6,
+33014118bytes. Dois relatórios sanitizadosPASS e checksums acompanham anexos.
+[Resumo de evidências](../../docs/evidence/admin-a22-release-0.11.0.json).
+
+Falhas anteriores permanecemFAIL/aviso, sem reescrita ou atribuição indevida
+de causa. O contrato determinístico de readiness foi corrigido separadamente.
+Fase6 global/produção/Windowsnativo/arm64/perda de energia não são aceitos por
+esta release. Não houve instalação/serviço no host, segredo real, latest,
+substituição de mqtt-admin legado ou edição do clienteC128. Registros após
+tag não movem a fonte aceita. Originaladmin poderá avançar somenteFF/clean.

@@ -1,6 +1,6 @@
 # XMQR Admin
 
-## Candidato experimental 0.11.0 — core v16
+## Release experimental 0.11.0 — core v16
 
 Compatibilidade A21 com o core público broker0.43.0 fixado em
 `ba6ef50204dec2c6385b272e595260b9def1e794`: backup/verify/restore offline
@@ -9,7 +9,9 @@ documento16. Migração de estado15 real não inventa intervalo original.
 [Aceite A21](prompts/registros/A21-core-v16-expiry-compatibility.md) e
 [nota de distribuição](docs/releases/0.11.0.md).
 
-O marco ainda aguarda os gates/publicação [A22](prompts/registros/A22-release-0.11.0.md).
+[Prerelease0.11.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.11.0)
+publicada com .deb/tarUbuntu26amd64, Docker numerado e14anexos verificados.
+Gates e digest no [registro A22](prompts/registros/A22-release-0.11.0.md).
 Downgrade de pacote não converte estado16: rollback executável do broker
 exige backup15 anterior à migração. Painel segue somente leitura/loopback,
 sem serviços automáticos e sem fechar a fase6 integrada por esta versão.

@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "scope": "Independent admin distribution only; not global phase6 acceptance or production certification",
+  "source_revision": "4483a356196db93f99340bc7aa3b3cabfc4af810",
+  "core_revision": "ba6ef50204dec2c6385b272e595260b9def1e794",
+  "ci_run": "https://github.com/licodevone/xmqr-admin/actions/runs/39143572778",
+  "ci_jobs_passed": 3,
+  "rust_tests": 27,
+  "distribution_export_notice_lifecycle_contracts": 33,
+  "a21_contracts": 9,
+  "a21_real_cases": 9,
+  "a21_native_release_elapsed_seconds": 3.1584,
+  "final_local_channel_repetitions": 4,
+  "docker_scenarios": 15,
+  "same_docker_scenarios_repeated_by_remote_digest": true,
+  "native_binary_sha256": "90dfc90ae0e05669c6ecc2f3db87a30d66823f29a10d5317194583fea2e94e43",
+  "bookworm_binary_sha256": "31cc950e06dbd4347cab3f84ae1cc5844cba9e2286ac98f52231267717890bc5",
+  "deb_sha256": "fe03ffc858e7583e7d8ce6808b4f56495c688beb69d47870db7fe0c1b8b55469",
+  "deb_size": 1301324,
+  "notice_packages": 225,
+  "notice_files": 418,
+  "docker_reference": "lepinheiro100/xmqr-admin-ui:0.11.0",
+  "remote_digest": "sha256:eadbf642fc99a1e6eb5ad15a020a211c31c1637f575f52c75617919af107b007",
+  "release_url": "https://github.com/licodevone/xmqr-admin/releases/tag/v0.11.0",
+  "annotated_tag_object": "69aa486bb2c68d3b24de34f6095f4ecc7193bcac",
+  "remote_assets_downloaded_hash_size_verified": 14,
+  "checksums_and_release_manifest_verified": true,
+  "historical_failures_preserved": [
+    "admin-a22-ci-preflight-fail.json",
+    "admin-a22-channel-restart-fail.json"
+  ],
+  "limits": [
+    "Original intermittent channel failure cause remains undetermined; deterministic readiness-contract defect fixed independently.",
+    "Package lifecycle uses synthetic private fixture; actual v15/v16 migration is verified separately by A21.",
+    "No host install, service, firewall, real credentials, latest tag, legacy replacement or client C128 changes."
+  ]
+}

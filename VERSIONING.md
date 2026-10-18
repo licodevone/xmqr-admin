@@ -1,9 +1,10 @@
 # Versionamento
 
-Candidato0.11.0: core broker043 fixado no SHA público
+Marco publicado0.11.0: core broker043 fixado no SHA público
 ba6ef50204dec2c6385b272e595260b9def1e794, compatibilidade A21 com estado16
-e migração15 real aprovada antes do bump. A22 exige CI exata, pacote/notices,
-ciclo descartável, imagemHub numerada e hashes remotos antes da tag.
+e migração15 real aprovada antes do bump. A22 aprovou CI exata, pacote/notices,
+dois ciclos descartáveis, imagemHub numerada e hashes dos14anexos remotos.
+Tag imutávelv0.11.0/source4483a356; registros posteriores não a movem.
 [Nota](docs/releases/0.11.0.md). Admin antigo transportar backup bruto não
 prova execução de broker antigo em16; preserve backup15 anterior.
 

@@ -1,11 +1,16 @@
 # Distribuição experimental
 
-Candidato atual0.11.0/A22: pacoteUbuntu26amd64 e imagem numerada
+Marco publicado0.11.0/A22: pacoteUbuntu26amd64 e imagem numerada
 `lepinheiro100/xmqr-admin-ui:0.11.0`, core broker043 pinba6ef502/estado16.
 [Nota e rollback](releases/0.11.0.md) e
 [registro de aceite/publicação](../prompts/registros/A22-release-0.11.0.md).
 Os checkpoints antigos abaixo continuam históricos. Downgrade de pacote não
 converte estado; não iniciar broker15 sobre diretório migrado16.
+
+[Prerelease0.11.0](https://github.com/licodevone/xmqr-admin/releases/tag/v0.11.0)
+tem14anexos, todos baixados e conferidos. Imagem pelo digest imutável
+`sha256:eadbf642fc99a1e6eb5ad15a020a211c31c1637f575f52c75617919af107b007`,
+com os15cenários reexecutados após pull remoto. Isso não encerra fase6 global.
 
 O marco publicado é [v0.8.0 experimental](https://github.com/licodevone/xmqr-admin/releases/tag/v0.8.0):
 pacote Ubuntu 26.04 amd64 `xmqr-admin_0.8.0-1_amd64.deb`, tar e imagem
