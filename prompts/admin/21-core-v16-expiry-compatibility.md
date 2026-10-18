@@ -1,4 +1,4 @@
-# A21 v1.0 — compatibilidade com expiração durável v16
+# A21 v1.1 — compatibilidade com expiração durável v16
 
 Preparado em2026-10-18 antes de alterar Cargo/código. Pedido: concluir fase6
 dos três sistemas, mantendo prompts, testes, commits e distribuição próprios.
@@ -45,3 +45,36 @@ testar upgrade/rollback em ambiente descartável e artefato remoto por digest.
 Tag imutável/prerelease só da fonte validada; não moverlatest/tags antigas.
 Rollback executável do broker exige backup15 anterior à primeira gravação16,
 não apenas instalar binário antigo sobre estado16. Não anunciar produção.
+
+## Revisão v1.1 — fixture independente antes do código
+
+Agente da fixture possui apenas scripts/verify_core_v16_expiry.py e registro
+A21. Coordenador mantém Cargo/lock/pin/versão/CI/distribuição. CLI exige
+--broker, --admin, --legacy-broker e --report, todos explícitos; relatório
+novo não substitui FAIL. Usar Python3.11+stdllib e recursos próprios em
+/var/tmp, ambientes MQTT isolados, loopback/portas efêmeras e processos
+próprios com deadlines. Não usar defaults de binário/pasta dos scripts antigos.
+
+Seed real: retainedTTL31, assinatura persistente offlineQoS1 com TTL31 e
+Will pendente delay120/MessageExpiry37. Inspeção somente após parar o broker:
+parser bounded de MQSNAP01/CRC32 e envelope TOML, não simples busca textual
+por version=16. Conferir watermark/original nas mensagens novas, mensagem
+do Will sem prazo até publicação, hashes e manifesto do backup/restore.
+Preservar ausência do marcador de perfil no backup; reinstalar somente o
+marcador criado pela própria fixture antes de abrir a cópia restaurada.
+
+Gerar outro estado com ELF legado real e exigir formato15; não reescrever
+versão nem inventar campo original. Backup/restore em cópia, abrir pelo novo
+broker e conferir16/intervalo original ausente nas mensagens legadas, dados
+preservados e MQTT após restore. Broker15 deve recusar16 sem mudar os hashes
+snapshot/WAL da cópia. Fixturev15 existente permanece inalterada.
+
+Negativos reais: backup ativo/lock, destino existente/symlink, snapshot
+corrompido e entrada de backup symlink, sem saída/destino parcial aceito.
+Relatório guarda apenas status/versões/hashes/contagens, sem caminhos privados,
+payloads, chaves, certificados, senhas ou logs brutos. Marker inequívoco
+A21_CORE_V16_EXPIRY_PASS só depois do conjunto completo real aprovado.
+Contratos unittest ficam no próprio script: parser truncado/CRC/duplicata/
+trailing/bounds, propriedades MQTT e manifesto adulterado. Contratos ou
+--help/AST não são wirePASS. Aguardar ELF16 e admin pinado do coordenador
+para executar integração; não instalar nem compilar por esta fixture.
