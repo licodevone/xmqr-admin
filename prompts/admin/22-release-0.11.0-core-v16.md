@@ -75,3 +75,17 @@ Nativebuild/notices/revisão1e2 e Dockerlabels/export devem usar o mesmo commit
 limpo exato. CIubuntu/Rust/A21 e smokeDocker por digest antes de tag/prerelease.
 Exportes/manifests/checksums remotos conferidos por download em pasta nova.
 Registros pós-tag só documentam publicação, não movem fonte/tag aceitas.
+
+## v1.2 — FAIL do Git protegido no containerCI, antes do build
+
+Run39141063998/ba7de18 jobUbuntu26 falhou antes da compilação:
+build_distribution.source_revision → git status exit128/dubious ownership.
+Git2.53 vê o workspace do runner com outro proprietário; o safe.directory
+temporário de actions/checkoutv4 não ficou efetivo no processo Python.
+Preservar esse FAIL; não usar --allow-draft nem remover o gate de fonte limpa.
+
+Corrigir somente o ambiente do job descartável: GIT_CONFIG_COUNT/KEY/VALUE
+adiciona safe.directory igual ao GITHUB_WORKSPACE exato para os processos do
+job. Sem '*', sem configglobal ou alteração de ownership do host. Verificar
+git rev-parse e status antes do builder; manter fonte limpa/revision/lock
+obrigatórios. Repetir CI completo da nova fonte. Runtime/pin/ELF011 não mudam.
