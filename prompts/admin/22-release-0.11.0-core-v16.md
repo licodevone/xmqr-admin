@@ -151,3 +151,27 @@ removido; não aceitar-15 nem esconder erro primário por falha de cleanup.
 Sem sleeps fixos ou retries que ignorem o prazo. Não modificar core, quotas,
 MQTT, credenciais, versão, lock ou ELFs. Repetir canal real e CI exata após
 fix; preservar pacotes/relatórios2f e gerar distribuição da nova fonte aceita.
+
+## v1.6 — contrato determinístico do harness, não atribuição da falha anterior
+
+As15reexecuções instrumentadas passaram; o exitcode do FAIL original continua
+desconhecido. Não repetir até ocultar esse resultado. Demonstrar o defeito
+contratual independentemente com processo/socket simulado: admin.sock existe,
+MQTT ainda recusa conexão. O start atual retorna sem observar o MQTT, logo
+deve falhar um teste que exige resposta dentro do prazo. Este RED não será
+apresentado como reprodução causal do broker real.
+
+Ownership apenas scripts/verify_channel_cli.py, novo teste stdlib, CI e este
+registro. Implementar recusaCONNACK5 de CONNECT anônimo3.1.1 como barrier
+sem criar sessão, preservando todos os cenários/admin asserts. stdout será
+escoado em thread com blocos4096 e retenção só63bytes para detectar tokens
+sintéticos atravessando blocos; sem logs brutos, arquivo ilimitado ou buffer
+proporcional ao tráfego. Erro de leitura continua FAIL. Startup/stop exigem
+PIDvivo/respostaantesdeadline8s e exit0/socketgone respectivamente. Cleanup
+forçado somente de filho próprio após FAIL não transforma o teste emPASS.
+
+Contratos negativos de deadline/processodead/malformedCONNACK/retorno-15,
+detecção de token e exceção primária; actionlint e diff. Reexecutar canal real
+debug e release do admin com ELFscore congelados, A21 e novaCI exata. Depois
+regenerar pacotes, smokeDocker e export; nunca rotular artefatos2f com SHA novo.
+Documentar cada resultado sem alegar que o contrato prova causa do FAIL real.
