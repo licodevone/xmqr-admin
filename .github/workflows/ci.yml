@@ -81,10 +81,15 @@ jobs:
     env:
       CARGO_BUILD_JOBS: '1'
       TMPDIR: /var/tmp
+      GIT_CONFIG_COUNT: '1'
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: ${{ github.workspace }}
     steps:
       - run: apt-get update -qq && apt-get install -y --no-install-recommends git curl ca-certificates build-essential cmake perl pkg-config python3 dpkg-dev
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Verify exact clean workspace before packaging
+        run: git rev-parse HEAD && test -z "$(git status --porcelain --untracked-files=all)"
       - run: python3 scripts/build_distribution.py --output dist/ci-native
       - run: apt-get install -y ./dist/ci-native/*.deb
       - run: test "$(xmqr-admin --version)" = 'xmqr-admin 0.11.0' && test ! -e /usr/lib/systemd/system/xmqr-admin.service && test ! -e /usr/bin/mqtt-admin

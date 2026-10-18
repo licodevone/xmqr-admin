@@ -1,0 +1,12 @@
+{
+  "status": "FAIL",
+  "source_revision": "ba7de181ed5b6967845082234a07a990693952ae",
+  "workflow_run": 39141063998,
+  "job": 117715423756,
+  "stage": "ubuntu-package/build_distribution/source_revision/git_status",
+  "git_exit_code": 128,
+  "step_exit_code": 1,
+  "diagnostic": "dubious_ownership_in_disposable_workspace",
+  "compile_started": false,
+  "scope": "sanitized observation of GitHub job log; not broker/admin runtime failure"
+}
