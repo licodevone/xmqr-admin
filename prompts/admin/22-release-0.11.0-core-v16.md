@@ -89,3 +89,23 @@ adiciona safe.directory igual ao GITHUB_WORKSPACE exato para os processos do
 job. Sem '*', sem configglobal ou alteração de ownership do host. Verificar
 git rev-parse e status antes do builder; manter fonte limpa/revision/lock
 obrigatórios. Repetir CI completo da nova fonte. Runtime/pin/ELF011 não mudam.
+
+## v1.3 — FAIL de notices de duas dependências WS, antes da correção
+
+Collector local da fonte99a7248, saída nova dist/a22-expected-notices, falhou
+exit1: pharos0.5.3 não tem LICENSE separado e não há suplemento revisado.
+ws_stream_tungstenite0.15.0 tem a mesma forma de declaração original no
+README. Preservar a saída parcial e o FAIL; não presumir falha MQTT nem
+substituir licenças por texto genérico. Não alterar Cargo/lock/runtime.
+
+Reutilizar somente as duas regras exatas já revisadas no broker e C131:
+commit upstream, repositório, declaração Unlicense, hash dos bytes README
+e seção License devem coincidir; ws também exige path_in_vcs vazio. Copiar
+o README original com proveniência imutável. Sem fallback para outros crates,
+sem converter licença de terceiros para MIT e sem reduzir o conjunto Cargo.
+
+Antes do fix, novos testes positivos devem reproduzir RED contra metadados
+locked reais. Depois, testar origem/hash/licença/repositório/versão e symlink
+negativos; incluir os contratos no CI. Repetir collector completo em saída
+nova e guardar contagens/hashes. A fonte exata corrigida exige CI completo
+novo e proveniência de pacotes/Hub; ELFs funcionais anteriores ficam intactos.
