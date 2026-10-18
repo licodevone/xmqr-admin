@@ -10,11 +10,11 @@ COPY src ./src
 COPY assets ./assets
 COPY scripts/collect_notices.py ./scripts/collect_notices.py
 COPY packaging/notices ./packaging/notices
-RUN cargo build --locked --release \
+RUN cargo build --locked --release -j1 \
     && python3 scripts/collect_notices.py --output /notices
 
 FROM debian:bookworm-slim AS runtime
-ARG VERSION=0.10.0
+ARG VERSION=0.11.0
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="XMQR Admin UI" \
       org.opencontainers.image.version="${VERSION}" \

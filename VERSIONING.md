@@ -1,5 +1,12 @@
 # Versionamento
 
+Candidato0.11.0: core broker043 fixado no SHA público
+ba6ef50204dec2c6385b272e595260b9def1e794, compatibilidade A21 com estado16
+e migração15 real aprovada antes do bump. A22 exige CI exata, pacote/notices,
+ciclo descartável, imagemHub numerada e hashes remotos antes da tag.
+[Nota](docs/releases/0.11.0.md). Admin antigo transportar backup bruto não
+prova execução de broker antigo em16; preserve backup15 anterior.
+
 Marco candidato 0.10.0: core Git fixado no broker P164 com estado v15,
 compatível com broker 0.29.0. A distribuição dependerá de CI do commit
 exato, pacote, imagem numerada, rollback e hashes remotos. Admin 0.9.0

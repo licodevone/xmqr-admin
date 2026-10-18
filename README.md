@@ -1,5 +1,19 @@
 # XMQR Admin
 
+## Candidato experimental 0.11.0 — core v16
+
+Compatibilidade A21 com o core público broker0.43.0 fixado em
+`ba6ef50204dec2c6385b272e595260b9def1e794`: backup/verify/restore offline
+preserva watermark, intervalo original de expiração e Will pendente do
+documento16. Migração de estado15 real não inventa intervalo original.
+[Aceite A21](prompts/registros/A21-core-v16-expiry-compatibility.md) e
+[nota de distribuição](docs/releases/0.11.0.md).
+
+O marco ainda aguarda os gates/publicação [A22](prompts/registros/A22-release-0.11.0.md).
+Downgrade de pacote não converte estado16: rollback executável do broker
+exige backup15 anterior à migração. Painel segue somente leitura/loopback,
+sem serviços automáticos e sem fechar a fase6 integrada por esta versão.
+
 A release experimental 0.10.0 fixa o core do broker P164 para o estado
 MQTT v15 e preserva um Will pendente com Message Expiry em backup offline.
 O broker 0.29.0 é o par; o broker 0.28.0 rejeita v15. A versão 0.9.0 do

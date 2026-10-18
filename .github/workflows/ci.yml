@@ -17,3 +17,82 @@ jobs:
       - run: python3 scripts/license_inventory.py --check
       - run: python3 packaging/test_distribution.py
       - run: python3 scripts/test_export.py
+
+  core-v16:
+    runs-on: ubuntu-latest
+    env:
+      TMPDIR: /var/tmp
+      CARGO_BUILD_JOBS: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: integrations/xmqr-admin
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: licodevone/xmqr
+          ref: ba6ef50204dec2c6385b272e595260b9def1e794
+          path: integrations/xmqr
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: licodevone/xmqr
+          ref: 24d219816fdac3e47115bcb2e59edd55b0c11407
+          path: integrations/legacy-broker
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            integrations/xmqr-admin
+            integrations/xmqr
+            integrations/legacy-broker
+      - name: Verify immutable core pin and build explicit peers
+        run: |
+          python3 - <<'PY'
+          import pathlib, tomllib
+          root = pathlib.Path('integrations/xmqr-admin')
+          revision = 'ba6ef50204dec2c6385b272e595260b9def1e794'
+          dependency = tomllib.loads((root / 'Cargo.toml').read_text())['dependencies']['mqtt-broker']
+          assert dependency == dict(git='https://github.com/licodevone/xmqr.git', rev=revision)
+          entries = [item for item in tomllib.loads((root / 'Cargo.lock').read_text())['package'] if item['name'] == 'mqtt-broker']
+          assert len(entries) == 1 and entries[0]['source'].endswith('?rev=' + revision + '#' + revision)
+          print('A22_CORE_PIN_PASS')
+          PY
+          cargo build --locked -j1 --manifest-path integrations/xmqr-admin/Cargo.toml --bin xmqr-admin
+          cargo build --locked -j1 --manifest-path integrations/xmqr/Cargo.toml --bin mqtt-broker
+          cargo build --locked -j1 --manifest-path integrations/legacy-broker/Cargo.toml --bin mqtt-broker
+      - name: A21 contracts and actual v16 backup migration
+        run: |
+          cd integrations/xmqr-admin
+          python3 -B -m unittest scripts.verify_core_v16_expiry.ContractTests -v
+          python3 -B scripts/verify_core_v16_expiry.py --broker "$GITHUB_WORKSPACE/integrations/xmqr/target/debug/mqtt-broker" --admin "$GITHUB_WORKSPACE/integrations/xmqr-admin/target/debug/xmqr-admin" --legacy-broker "$GITHUB_WORKSPACE/integrations/legacy-broker/target/debug/mqtt-broker" --report "$GITHUB_WORKSPACE/.evidence/a21-v16.json"
+          python3 -B scripts/verify_channel_cli.py --broker "$GITHUB_WORKSPACE/integrations/xmqr/target/debug/mqtt-broker" --admin "$GITHUB_WORKSPACE/integrations/xmqr-admin/target/debug/xmqr-admin"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: admin-v16-evidence
+          path: .evidence/*.json
+
+  ubuntu-package:
+    runs-on: ubuntu-latest
+    container: ubuntu:26.04
+    env:
+      CARGO_BUILD_JOBS: '1'
+      TMPDIR: /var/tmp
+    steps:
+      - run: apt-get update -qq && apt-get install -y --no-install-recommends git curl ca-certificates build-essential cmake perl pkg-config python3 dpkg-dev
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - run: python3 scripts/build_distribution.py --output dist/ci-native
+      - run: apt-get install -y ./dist/ci-native/*.deb
+      - run: test "$(xmqr-admin --version)" = 'xmqr-admin 0.11.0' && test ! -e /usr/lib/systemd/system/xmqr-admin.service && test ! -e /usr/bin/mqtt-admin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: admin-ubuntu26-amd64
+          path: |
+            dist/ci-native/*.deb
+            dist/ci-native/*.tar.gz
+            dist/ci-native/*.json
+            dist/ci-native/*.sha256
