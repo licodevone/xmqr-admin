@@ -123,3 +123,31 @@ arquivos ocultos, logs, tokens ou fixtures. Pacotes nativos também exigem
 if-no-files-found=error. Conferir actionlint, CI exata e baixar o anexo para
 validar status/nove casos/identidades; registrar o aviso anterior sem apagá-lo.
 Sem alterar runtime, Cargo, lock ou ELFs congelados.
+
+## v1.5 — investigar corrida de readiness do canal antes de corrigir
+
+Fonte2f3609f/CI39142145338 integral PASS e pacotes Ubuntu26 aprovados nos
+dois ciclos descartáveis. Reexecução local adicional do canal, com broker
+debugfce0b871 e adminrelease90dfc90a, falhou na conexão MQTT logo após restart:
+ConnectionRefusedError em new-after-restart; finally stop também lançou
+AssertionError, ocultando a primeira causa. Preservar este FAIL separado.
+
+Não atribuir um exitcode específico à falha anterior sem medi-lo. Leitura
+mostrou que start só observa admin.sock, criado no core antes do bind MQTT,
+monitor e instalação do handlerSIGTERM. Isto é hipótese concreta de corrida,
+não prova de defeito MQTT ou justificativa para aceitar erro de shutdown.
+
+Primeiro instrumentar reexecuções em recursos privados, sem relaxar oráculos:
+tempo entre socketadmin e respostaMQTT, PID/returncode, stage original e
+status da limpeza, sem expor tokens/bundle/logs brutos. Corrigir somente o
+harness se a hipótese for comprovada. Gate de readiness deve ter deadline
+absoluto8s, PID vivo e resposta MQTT válida de recusa a CONNECT anônimo no
+acl-lab (sem sessão criada), não só TCPconectável ou arquivo/socket presente.
+Leitura de stdout deve ser limitada/escoada para não bloquear o filho.
+
+Negativos devem recusar processo morto, prazo ultrapassado, resposta inválida
+ou broker eternamente não pronto. Shutdown continua exigindo exit0/socket
+removido; não aceitar-15 nem esconder erro primário por falha de cleanup.
+Sem sleeps fixos ou retries que ignorem o prazo. Não modificar core, quotas,
+MQTT, credenciais, versão, lock ou ELFs. Repetir canal real e CI exata após
+fix; preservar pacotes/relatórios2f e gerar distribuição da nova fonte aceita.
