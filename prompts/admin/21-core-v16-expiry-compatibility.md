@@ -1,4 +1,4 @@
-# A21 v1.2 — compatibilidade com expiração durável v16
+# A21 v1.3 — compatibilidade com expiração durável v16
 
 Preparado em2026-10-18 antes de alterar Cargo/código. Pedido: concluir fase6
 dos três sistemas, mantendo prompts, testes, commits e distribuição próprios.
@@ -101,3 +101,13 @@ independentes atravessando parser snapshot/TOML, não repetir list(payload).
 Manter v15/16/intervalos e negativos anteriores, repetir contratos e seed15
 em relatório GREEN separado. Nenhum runtime, Cargo, pin, CI ou serviço real
 é alterado; integração16 permanece NOT_RUN até ELFs do coordenador.
+
+## Revisão v1.3 — launcher do selftest, não resultado MQTT
+
+Seed15 real confirmou FAIL fixture_message_bytes_and_qos e tipos str nas
+três mensagens. Novo selftest de TOML hex literal também falhou antes do
+fix,1FAIL/0.005s. A primeira edição de representação introduziu um parêntese
+extra no dict aninhado do selftest anterior; unittest parou com SyntaxError,
+exit1 antes de coletar testes. Corrigir somente essa sintaxe e repetir os
+mesmos nove contratos e seed15; não chamar erro de import de regressão no
+broker nem apagar o FAIL anterior. Oráculos e escopo v1.2 preservados.

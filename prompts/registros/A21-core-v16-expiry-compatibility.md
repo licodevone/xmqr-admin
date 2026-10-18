@@ -1,4 +1,4 @@
-# A21 — preparação da fixture v16, integração ainda não executada
+# A21 — fixture preparada, oráculo v15 corrigido, integração16 não executada
 
 18/10/2026. Entrada e5c4f23eef70c4b22427e5c763532e2e1a670dec,
 admin0.10.0/coreGit9215d4c (v15). PromptA21 v1.0 precedeu o código;
@@ -67,3 +67,63 @@ python3 -B scripts/verify_core_v16_expiry.py --broker /caminho/privado/broker16 
 Qualquer FAIL exige revisão do prompt antes de corrigir fonte/fixture. Não
 transformar preparação em aceite global de fase6, compatibilidade publicada
 ou declaração de produção. Sem push/tag/release nesta contribuição.
+
+## Revisões v1.2/v1.3 — representação persistida, RED e GREEN reais
+
+O coordenador identificou que hex_bytes do writer persiste payload como
+string hexadecimal. A primeira check_document esperava listas de inteiros;
+o selftest antigo também as construía, portanto os oito PASS iniciais eram
+internos e não comprovavam compatibilidade desse oráculo com estado real.
+Promptv1.2 foi registrado antes da correção no commit67b93aa.
+
+Seed real em /var/tmp privado, Ubuntu26.04/WSL2, Python3.14, usando somente
+filhos próprios, loopback/portas efêmeras, confirmou documento15 e ausência
+de expiry_interval_seconds legado. Retained,offline e Will eram todos str.
+check_document(documento,15,None) falhou com fixture_message_bytes_and_qos
+em0.2678s. O ELF foi o P227D broker0.42.0 congelado, não broker16:
+
+```text
+broker SHA256 dca22b2624b7f36175d4e939c640b6f5730220bcc9510580eef9054a6af8ef57
+admin0.10.0 SHA256 17036128ceddf37f515c3a2077bdaf57e44bd44a8cfd9f1591e9c7f848c918d3
+```
+
+Relatório RED preservado em dist/a21-v15-hex-oracle-red.json, SHA256
+0b9c46cb649db40b999dcc09081665a4aa47fd5f9cd4b1804a149714235adc5a.
+Ele registra o hash do harness anterior822318c9..., identidades, tipos,
+document_version15/original_interval_absenttrue e hashes snapshot/WAL,
+sem dump, payload, caminhos privados ou credenciais. Nenhum PASS16 emitido.
+
+Antes de corrigir a função, novo contrato com TOML literal hex independente,
+atravessando MQSNAP01/CRC32/TOML, também reproduziu1FAIL/0.005s,exit1 no
+mesmo oráculo. A primeira edição teve um parêntese extra no dict aninhado
+de outro selftest: SyntaxError,exit1 antes da coleta. Revisãov1.3 antecedeu
+a correção somente sintática; esse erro não é uma regressão do broker.
+
+check_payload agora exige string hex canônica minúscula/par de no máximo
+8192 caracteres, decodifica e compara com os bytes sintéticos enviados.
+Lista, espaço, sinal, caracteres inválidos, comprimento ímpar, excesso de
+limite, bytes diferentes e None são negativos reais do novo contrato. Não
+houve mudança no broker, no formato persistido ou nas quotas do produto.
+
+Validações posteriores:
+
+| Gate | Resultado real |
+| --- | --- |
+| python3 -B -m unittest scripts.verify_core_v16_expiry.ContractTests -v |9PASS,0.045s,exit0|
+| Repetição seed real P227D e check_document(documento15,15,None) |PASS,0.1706s,exit0|
+| git diff --check |PASS|
+| Integração nativa16/migração15→16/novo admin pinado |NOT_RUN,aguarda ELFs|
+
+A repetição usou as mesmas funções seed/document/check_document com novos
+recursos temporários e relatório separado, dist/a21-v15-hex-oracle-green.json,
+SHA256 a768b4965da57369662e72553fa89a34557ca5a55aff54aa5d1b51aff7b5f7bd.
+Hashes snapshot diferentes entre os seeds são esperados pelas timestamps;
+o WAL vazio foi idêntico. O relatório mantém explicitamente v16 NOT_RUN.
+Não emite o marcador A21_CORE_V16_EXPIRY_PASS destinado ao conjunto completo.
+
+SHA256 final do script corrigido:
+b6a07b5f93260cf081b31e2b3669ab98b159156f1f4deda2a7109478386c31f8.
+Fixturev15 histórica continua intocada, SHA256 debda739946a63c1fc17586cf3b6099511bee1fc492fdb4e01ae5b991f6923bb.
+Os relatórios locais ignorados foram preservados; não se anexa estado bruto.
+Cargo, runtime, pin, CI, versão e publicação não foram alterados por este
+agente. Aguardar os três ELFs congelados para executar a fixture completa.
