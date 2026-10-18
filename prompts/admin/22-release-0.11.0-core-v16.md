@@ -47,3 +47,31 @@ smokes por digest após push. Tag anotada imutável v0.11.0 e prerelease
 somente da fonte validada por CI, pacote, inventário e integrações. Conferir
 tamanho/SHA dos anexos remotos e digestHub. Não mover latest/tags anteriores,
 não publicar segredo ou estado, não anunciar produção/certificação integral.
+
+## v1.1 — distribuição em clone próprio e CI de compatibilidade
+
+Execução autorizada no clone `.artifacts/p227-admin-release011`, branch
+release/0.11.0; original0612c48 continua preservado. A21v1.4 fixou core
+público ba6ef50204dec2c6385b272e595260b9def1e794. Não bump antes de A21
+real aprovado. Depois do aceite, Cargo gera o lock011 sem atualizar outras
+dependências. Atualizar Dockerdefault011/-j1, README/VERSIONING/distribution,
+CHANGELOG se existente, nota e registros, com limites de rollback explícitos.
+
+CI manterá os gates atuais e acrescentará jobA21 (checkouts exatos do coreba6
+e legacy24d219816fdac3e47115bcb2e59edd55b0c11407, debugELFs próprios,
+novecontratos+novecasos reais e canalCLI) e jobUbuntu26 empacotando fonte
+limpa, conferindo versão e ausência de serviços/legacy replacement. Todos
+os pins públicos, sem pathdependency; registrar hashes e revision do lock.
+
+Novo packaging/test_version_lifecycle.sh pode complementar, não substituir,
+o ciclo histórico de revisãoDebian1→2→1: instalação010 publicada, upgrade011,
+rollback010 e remove/purge em containerUbuntu26 próprio sem rede, preservando
+token0600/configuração/fixture privada e o nome legacy mqtt-admin. Isso não
+converte estado16 para15; compatibilidade MQTT/backup é gateA21 separado.
+Nenhuma instalação no WSL ou serviçohost. Versão/tagHub011 reconferida livre
+antes de publicar; runtimeDocker separadoBookworm e nonroot10001 preservados.
+
+Nativebuild/notices/revisão1e2 e Dockerlabels/export devem usar o mesmo commit
+limpo exato. CIubuntu/Rust/A21 e smokeDocker por digest antes de tag/prerelease.
+Exportes/manifests/checksums remotos conferidos por download em pasta nova.
+Registros pós-tag só documentam publicação, não movem fonte/tag aceitas.
