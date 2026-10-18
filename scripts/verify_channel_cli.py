@@ -7,7 +7,9 @@ import os
 from pathlib import Path
 import socket
 import subprocess
+import sys
 import tempfile
+import threading
 import time
 from urllib.request import urlopen
 
@@ -93,22 +95,123 @@ def edit_bundle(admin, *args):
         raise AssertionError(f'bundle edit refused: {result.stderr}')
 
 
+class OutputGuard:
+    """Drain without retaining raw logs; scan synthetic tokens across chunks."""
+    def __init__(self, stream):
+        self.stream = stream
+        self.leaked = False
+        self.error = None
+        self.thread = threading.Thread(target=self.consume, daemon=True)
+        self.thread.start()
+
+    def consume(self):
+        carry = b''
+        try:
+            while chunk := self.stream.read(4096):
+                combined = carry + chunk
+                self.leaked |= b'a' * 64 in combined or b'b' * 64 in combined
+                carry = combined[-63:]
+        except Exception as error:
+            self.error = type(error).__name__
+        finally:
+            try:
+                self.stream.close()
+            except Exception as error:
+                self.error = type(error).__name__
+
+    def finish(self, deadline):
+        self.thread.join(max(0, deadline - time.monotonic()))
+        assert not self.thread.is_alive(), 'owned log drain deadline exceeded'
+        assert self.error is None, 'owned log drain read failure'
+        assert not self.leaked, 'synthetic token appeared in broker logs'
+
+
+def force_cleanup(process):
+    """Only a failed fixture's already-owned child, never acceptance evidence."""
+    if process.poll() is None:
+        process.kill()
+    process.wait(timeout=5)
+    if process.channel_output is None:
+        process.stdout.close()
+    else:
+        process.channel_output.thread.join(timeout=5)
+        assert not process.channel_output.thread.is_alive(), 'owned failed-fixture drain still alive'
+
+
+def anonymous_refusal(address, deadline):
+    """A complete MQTT response proves the serving future has been polled."""
+    with socket.create_connection(address, timeout=min(.2, max(.001, deadline - time.monotonic()))) as peer:
+        peer.settimeout(min(.2, max(.001, deadline - time.monotonic())))
+        # No username/password: acl-lab must refuse, without creating a session.
+        peer.sendall(b'\x10\x1b\x00\x04MQTT\x04\x02\x00\x1e\x00\x0fadmin-readiness')
+        response = b''
+        while len(response) < 4:
+            peer.settimeout(min(.2, max(.001, deadline - time.monotonic())))
+            part = peer.recv(4 - len(response))
+            assert part, 'owned startup MQTT response truncated'
+            response += part
+        assert response == b'\x20\x02\x00\x05', 'owned startup anonymous MQTT refusal invalid'
+        assert time.monotonic() < deadline, 'owned startup MQTT response past deadline'
+
+
 def start(broker, env, socket_path):
+    deadline = time.monotonic() + 8
     process = subprocess.Popen([str(broker)], env=env,
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    deadline = time.monotonic() + 8
-    while not socket_path.exists():
-        if process.poll() is not None or time.monotonic() > deadline:
-            raise AssertionError('broker socket did not start')
-        time.sleep(.02)
-    return process
+    process.channel_output = None
+    try:
+        process.channel_output = OutputGuard(process.stdout)
+        host, port = env['MQTT_BIND'].rsplit(':', 1)
+        assert host == '127.0.0.1' and 0 < int(port) < 65536
+        while time.monotonic() < deadline:
+            assert process.poll() is None, 'owned broker exited before readiness'
+            if socket_path.exists():
+                try:
+                    anonymous_refusal((host, int(port)), deadline)
+                except (ConnectionRefusedError, TimeoutError):
+                    pass
+                else:
+                    assert process.poll() is None and time.monotonic() < deadline
+                    return process
+            time.sleep(min(.02, max(0, deadline - time.monotonic())))
+        raise AssertionError('owned broker startup deadline exceeded')
+    except BaseException as primary:
+        try:
+            force_cleanup(process)
+        except Exception as cleanup:
+            primary.add_note('owned startup cleanup failed: ' + type(cleanup).__name__)
+        raise
 
 
 def stop(process, socket_path):
-    process.terminate()
-    output, _ = process.communicate(timeout=8)
-    assert process.returncode == 0 and not socket_path.exists()
-    assert b'a' * 64 not in output and b'b' * 64 not in output
+    deadline = time.monotonic() + 8
+    try:
+        process.terminate()
+        process.wait(timeout=max(.001, deadline - time.monotonic()))
+        process.channel_output.finish(deadline)
+        assert time.monotonic() < deadline, 'owned broker stop past deadline'
+        assert process.returncode == 0 and not socket_path.exists(), \
+            f'owned broker stop failed: exit={process.returncode}, socket_exists={socket_path.exists()}'
+    except BaseException as primary:
+        try:
+            force_cleanup(process)
+        except Exception as cleanup:
+            primary.add_note('owned stop cleanup failed: ' + type(cleanup).__name__)
+        raise
+
+
+def finish_fixture(process, endpoint):
+    primary = sys.exception()
+    if process.poll() is None:
+        try:
+            stop(process, endpoint)
+        except Exception as cleanup:
+            if primary is None:
+                raise
+            primary.add_note('owned fixture cleanup failed: ' + type(cleanup).__name__)
+    elif primary is None:
+        assert process.returncode == 0 and not endpoint.exists(), 'owned fixture exited unexpectedly'
+        process.channel_output.finish(time.monotonic() + 8)
 
 
 def main():
@@ -373,8 +476,7 @@ def main():
             assert str(root) not in checked.stdout
             print('CHANNEL_CLI_PASS')
         finally:
-            if process.poll() is None:
-                stop(process, endpoint)
+            finish_fixture(process, endpoint)
 
 
 if __name__ == '__main__':

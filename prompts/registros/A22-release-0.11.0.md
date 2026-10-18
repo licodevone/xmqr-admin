@@ -92,3 +92,24 @@ do FAIL anterior nem a corrige retroativamente. Nenhum fix de readiness foi
 aplicado. Próximo recorte: contrato determinístico de socketadmin disponível
 antes da respostaMQTT, seguido de gate de resposta dentro do prazo e cleanup
 que preserve a exceção primária. Publicação011 continua retida por esse gate.
+
+## Contrato de lifecycle do harness — RED/GREEN independente
+
+Promptv1.6/ac8ab84 precedeu teste e fix. RED determinístico: processo/socket
+simulados, socketadmin disponível mas MQTT atrasado; start antigo retornou
+sem probe, connect.call_count=0 em vez de3. Isto comprova uma lacuna do
+contrato do harness, não reproduz a causa desconhecida do FAIL real anterior.
+
+Novo start exige CONNACK5 à conexão anônima3.1.1 (sem criar sessão), PIDvivo
+e deadlineabsoluto8s; stop continua exigindo exit0/socketgone e prazo, inclusive
+recusando-15. Drain4096 em thread retém apenas63bytes para detectar tokens
+sintéticos entre blocos, sem guardar logs. Erros de leitura/fechamento ou
+criação do reader sãoFAIL/cleanuppróprio; finally não mascara exceção primária.
+Nenhum cenário/adminassert, coreRust, versão, lock ou ELF alterado.
+
+GREEN12contratos em0.016s e actionlintPASS. Dois smokes reais intermediários
+(adminrelease90df e debug732 com brokerfce) CHANNEL_CLI_PASS, sem atribuição
+causal retroativa. Fonte final será novamente exercitada e exigirá CI/pacotes
+próprios; artefatos2f permanecem históricos. Hashes finais dos helpers:
+verify_channel_cli.py d27d67d556b7292827ca8d548765620e9023286729f49db9e22b09f0fa3a3e14,
+test_channel_lifecycle.py6fe70557ba366e9dc8d44c10cfffca34aa4e7fc1d2b26c8012eac9b71d850a57.
