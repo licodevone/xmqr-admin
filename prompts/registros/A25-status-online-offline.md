@@ -59,4 +59,8 @@ modeusers/setup_requiredtrue. Console desabilitado até preparar novos perfis.
 Processo supervisionado pela sessão17569; nenhum segredo impresso/publicado.
 
 Esta fatia não conclui fase8/bridgeC148 nem distribui versão nova do admin.
-Commit/push autorizados; CI do commit exato pendente de conclusão.
+Commit4c664cffe3fb5fb6f99624c51e92ade6b827c03e publicado; a
+[CI39295934824](https://github.com/licodevone/xmqr-admin/actions/runs/39295934824)
+passou nos quatro jobs: validate, core-v16, ubuntu-package e mqtt-board.
+Inclui integração mTLS real com broker0.43.0/client0.42.1 e pacote Ubuntu26
+do commit exato, sem promover o artefato CI a release numerada.

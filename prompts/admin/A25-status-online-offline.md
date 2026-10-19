@@ -78,4 +78,4 @@ Checklist inicialmente pendente:
 - [x] Agregado de disponibilidade sem efeitos.
 - [x] Indicadores e invalidação no navegador.
 - [x] Testes, documentação e evidências.
-- [ ] Commit/push e CI do commit exato.
+- [x] Commit/push e CI do commit exato4c664cf:39295934824 PASS nos quatro jobs.

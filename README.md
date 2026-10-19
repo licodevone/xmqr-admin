@@ -7,7 +7,8 @@ o client da assinatura compartilhada e o servidor admin. Cada indicador
 explica a verificação usada. Uma falha de consulta invalida os estados
 anteriores; o painel não mantém uma leitura antiga como confirmação atual.
 [Critérios e limites](docs/system-status.md) e [validação local](prompts/registros/A25-status-online-offline.md).
-Aceite local A25 concluído, CI pendente; sem nova release ou substituição do pacote instalado.
+Aceite local e [CI A25](https://github.com/licodevone/xmqr-admin/actions/runs/39295934824)
+concluídos; sem nova release ou substituição do pacote instalado.
 
 ## Fonte A24 — autenticação por usuários
 
