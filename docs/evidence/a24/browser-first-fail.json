@@ -1,0 +1,12 @@
+{
+  "status": "FAIL",
+  "steps": [
+    "bootstrap unico e entrada do administrador sem expor senha/codigo",
+    "administrador cria contas com papeis e nomes renderizados sem HTML",
+    "senha incorreta recusada com erro generico",
+    "consulta restrita e sessao restaurada apos refresh",
+    "operador acessa console sem gestao de usuarios",
+    "desativacao de conta e layout mobile sem overflow"
+  ],
+  "error": "TimeoutError: page.waitForLoadState: Timeout 30000ms exceeded."
+}

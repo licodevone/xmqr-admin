@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "steps": [
+    "bootstrap unico e entrada do administrador sem expor senha/codigo",
+    "administrador cria contas com papeis e nomes renderizados sem HTML",
+    "senha incorreta recusada com erro generico",
+    "consulta restrita e sessao restaurada apos refresh",
+    "operador acessa console sem gestao de usuarios",
+    "desativacao de conta e layout mobile sem overflow",
+    "logout revoga sessao e nenhum segredo persiste em storage ou URL"
+  ],
+  "backend": "servidor A24 e contas reais descartaveis; nenhum dado do operador",
+  "browser": "Chromium/Playwright"
+}

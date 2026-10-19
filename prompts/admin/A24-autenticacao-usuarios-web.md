@@ -1,4 +1,4 @@
-# A24 v1.0 — usuários e sessões do painel web
+# A24 v1.1 — usuários e sessões do painel web
 
 2026-10-19. Entrada5f98f4a/A23, admin0.11.0 fonte; pacote instalado preservado.
 Usuário solicita autenticação por usuários, com agentes paralelos autorizados.
@@ -79,3 +79,21 @@ setup/login/roles/contas/logout emdesktop/mobile. RegressõesA23 e gates
 fmt/test/Clippy/buildrelease/inventário, evidências sanitizadas/CIexata.
 Preview9080 pode ser reiniciado após testes mantendo broker8883/monitor9090;
 usuário definirá senha pessoal no navegador, não viachat/modelo.
+
+Primeiro cargo check: integrador tentou inserir Identity em request.extensions,
+que exige Clone; a extensão não é usada por handlers. Remover a inserção e a
+mutabilidade, mantendo autorização no middleware e nova checagem no logout.
+Não enfraquecer papéis/CSRF para satisfazer o compilador.
+
+Primeiro gate Rust passou41testes (antes dos três testes adicionais). Clippy
+recusou quatro subtrações Instant/Duration sem checked_sub nos testes de
+expiração; corrigir mantendo a prova dos limites. Log preservado em
+/var/tmp/a24-clippy-1.log. Revisão de concorrência exige não manter mutex de
+estado durante fsync: serializar escrita em spawn_blocking e publicar estado
+em trechos curtos, mantendo limites de concorrência e revogação.
+
+FixtureHTTP18/18PASS e44testesRust/ClippyPASS. Browser1 completou seis passos
+com setup/login/roles/contas/mobile, mas a espera global networkidle apóslogout
+expirou. Preservar FAIL. Tornar a prova final específica: cookie ausente depois
+de logout e GETsession401 no reload, em vez de depender de silêncio global de
+rede. Não remover asserções de revogação, isolamento, storage ou conteúdo.

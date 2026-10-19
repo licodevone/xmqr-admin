@@ -4,11 +4,15 @@ use crate::{
     monitor,
     mqtt_console::{Board, BoardError, ConnectRequest, PublishRequest, Snapshot},
     token::Token,
+    web_auth::{
+        Auth, AuthConfig, AuthError, CreateUserRequest, LoginRequest, SessionInfo, SetupRequest,
+        StateRequest, UserInfo,
+    },
 };
 use axum::{
     Json, Router,
     extract::{DefaultBodyLimit, Request, State, rejection::JsonRejection},
-    http::{HeaderValue, Method, StatusCode, header},
+    http::{HeaderMap, HeaderValue, Method, StatusCode, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
     routing::{get, post},
@@ -23,15 +27,22 @@ struct App {
     client: reqwest::Client,
     slots: Arc<Semaphore>,
     board: Board,
+    auth: Auth,
 }
 
-fn routes(config: Config, token: Token, board: Board) -> Result<Router, reqwest::Error> {
+fn routes(
+    config: Config,
+    token: Token,
+    board: Board,
+    auth: Auth,
+) -> Result<Router, reqwest::Error> {
     let app = App {
         config,
         token: Arc::new(token),
         client: monitor::client()?,
         slots: Arc::new(Semaphore::new(16)),
         board,
+        auth,
     };
     Ok(build(app))
 }
@@ -47,6 +58,13 @@ fn build(app: App) -> Router {
         .route("/api/mqtt/connect", post(mqtt_connect))
         .route("/api/mqtt/disconnect", post(mqtt_disconnect))
         .route("/api/mqtt/publish", post(mqtt_publish))
+        .route("/api/auth/config", get(auth_config))
+        .route("/api/auth/setup", post(auth_setup))
+        .route("/api/auth/login", post(auth_login))
+        .route("/api/auth/session", get(auth_session))
+        .route("/api/auth/logout", post(auth_logout))
+        .route("/api/auth/users", get(auth_users).post(auth_create_user))
+        .route("/api/auth/users/state", post(auth_user_state))
         .fallback(|| async { StatusCode::NOT_FOUND })
         .layer(middleware::from_fn_with_state(app.clone(), guard))
         .layer(DefaultBodyLimit::max(8192))
@@ -82,7 +100,14 @@ async fn guarded(app: App, request: Request, next: Next) -> Response {
     let mqtt_write = request.method() == Method::POST
         && matches!(
             request.uri().path(),
-            "/api/mqtt/connect" | "/api/mqtt/disconnect" | "/api/mqtt/publish"
+            "/api/mqtt/connect"
+                | "/api/mqtt/disconnect"
+                | "/api/mqtt/publish"
+                | "/api/auth/setup"
+                | "/api/auth/login"
+                | "/api/auth/logout"
+                | "/api/auth/users"
+                | "/api/auth/users/state"
         );
     if !matches!(*request.method(), Method::GET | Method::HEAD) && !mqtt_write {
         return StatusCode::METHOD_NOT_ALLOWED.into_response();
@@ -121,7 +146,22 @@ async fn guarded(app: App, request: Request, next: Next) -> Response {
             return StatusCode::PAYLOAD_TOO_LARGE.into_response();
         }
     }
-    if request.uri().path().starts_with("/api/") {
+    let public_auth = matches!(
+        (request.method(), request.uri().path()),
+        (&Method::GET | &Method::HEAD, "/api/auth/config")
+            | (&Method::POST, "/api/auth/setup" | "/api/auth/login")
+    );
+    if request.uri().path().starts_with("/api/") && !public_auth && app.auth.is_users() {
+        let identity = match app.auth.authorize(headers, mqtt_write).await {
+            Ok(identity) => identity,
+            Err(error) => return error.into_response(),
+        };
+        if (request.uri().path().starts_with("/api/mqtt") && !identity.role.allows_mqtt())
+            || (request.uri().path().starts_with("/api/auth/users") && !identity.role.is_admin())
+        {
+            return StatusCode::FORBIDDEN.into_response();
+        }
+    } else if request.uri().path().starts_with("/api/") && !public_auth {
         let candidate = headers
             .get(header::AUTHORIZATION)
             .and_then(|v| v.to_str().ok())
@@ -202,6 +242,97 @@ fn invalid_json() -> BoardError {
     }
 }
 
+async fn auth_config(State(app): State<App>) -> Json<AuthConfig> {
+    Json(app.auth.config().await)
+}
+
+async fn auth_setup(
+    State(app): State<App>,
+    request: Result<Json<SetupRequest>, JsonRejection>,
+) -> Response {
+    let Ok(Json(request)) = request else {
+        return invalid_json().into_response();
+    };
+    match app.auth.setup(request, &app.token).await {
+        Ok(reply) => reply.into_response(),
+        Err(error) => error.into_response(),
+    }
+}
+
+async fn auth_login(
+    State(app): State<App>,
+    request: Result<Json<LoginRequest>, JsonRejection>,
+) -> Response {
+    let Ok(Json(request)) = request else {
+        return invalid_json().into_response();
+    };
+    match app.auth.login(request).await {
+        Ok(reply) => reply.into_response(),
+        Err(error) => error.into_response(),
+    }
+}
+
+async fn auth_session(
+    State(app): State<App>,
+    headers: HeaderMap,
+) -> Result<Json<SessionInfo>, AuthError> {
+    app.auth.session(&headers).await.map(Json)
+}
+
+async fn auth_logout(
+    State(app): State<App>,
+    headers: HeaderMap,
+    request: Result<Json<serde_json::Value>, JsonRejection>,
+) -> Response {
+    let Ok(Json(request)) = request else {
+        return invalid_json().into_response();
+    };
+    if !request.as_object().is_some_and(serde_json::Map::is_empty) {
+        return invalid_json().into_response();
+    }
+    let current = match app.auth.authorize(&headers, true).await {
+        Ok(identity) => identity,
+        Err(error) => return error.into_response(),
+    };
+    if current.role.allows_mqtt() {
+        let _ = app.board.disconnect().await;
+    }
+    match app.auth.logout(&headers).await {
+        Ok(reply) => reply,
+        Err(error) => error.into_response(),
+    }
+}
+
+async fn auth_users(State(app): State<App>) -> Result<Json<Vec<UserInfo>>, AuthError> {
+    app.auth.users().await.map(Json)
+}
+
+async fn auth_create_user(
+    State(app): State<App>,
+    request: Result<Json<CreateUserRequest>, JsonRejection>,
+) -> Response {
+    let Ok(Json(request)) = request else {
+        return invalid_json().into_response();
+    };
+    match app.auth.create_user(request).await {
+        Ok(users) => Json(users).into_response(),
+        Err(error) => error.into_response(),
+    }
+}
+
+async fn auth_user_state(
+    State(app): State<App>,
+    request: Result<Json<StateRequest>, JsonRejection>,
+) -> Response {
+    let Ok(Json(request)) = request else {
+        return invalid_json().into_response();
+    };
+    match app.auth.set_enabled(request).await {
+        Ok(users) => Json(users).into_response(),
+        Err(error) => error.into_response(),
+    }
+}
+
 async fn favicon() -> impl IntoResponse {
     (
         [(header::CONTENT_TYPE, "image/svg+xml")],
@@ -231,7 +362,10 @@ async fn js() -> impl IntoResponse {
 pub async fn serve(config: Config, token: Token) -> io::Result<()> {
     let address = config.bind;
     let board = Board::from_env()?;
-    let router = routes(config, token, board.clone())
+    let auth = tokio::task::spawn_blocking(Auth::from_env)
+        .await
+        .map_err(|_| io::Error::other("autenticacao indisponivel"))??;
+    let router = routes(config, token, board.clone(), auth)
         .map_err(|_| io::Error::other("unable to initialize local HTTP client"))?;
     let listener = tokio::net::TcpListener::bind(address).await?;
     let (stop, stopped) = oneshot::channel::<()>();
@@ -285,6 +419,7 @@ mod tests {
             client: monitor::client().unwrap(),
             slots: Arc::new(Semaphore::new(16)),
             board: Board::disabled(),
+            auth: Auth::token_only(),
         }
     }
 

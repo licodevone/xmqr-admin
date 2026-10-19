@@ -1,0 +1,86 @@
+{
+  "schema": "xmqr-admin-web-auth-a24-v1",
+  "status": "PASS",
+  "started_unix": 1792430156,
+  "hashes": {
+    "admin_elf_sha256": "2841536e363e6a0e34e5318ee629dcb20f38400d3bfc746f4cb3a2f3c72b480c",
+    "fixture_sha256": "46c56db025da720c42b9ac08c67a8aa86feda4e2eddebf34920eb1939c712e09"
+  },
+  "scenarios": [
+    {
+      "name": "public configuration and anonymous APIs do not expose protected data",
+      "status": "PASS"
+    },
+    {
+      "name": "Host Origin query method schema and body limits precede authentication",
+      "status": "PASS"
+    },
+    {
+      "name": "bootstrap rejects an incorrect local token without creating users",
+      "status": "PASS"
+    },
+    {
+      "name": "single bootstrap creates normalized administrator and opaque secure cookie",
+      "status": "PASS"
+    },
+    {
+      "name": "persistent private database contains Argon2id and no original secrets or sessions",
+      "status": "PASS"
+    },
+    {
+      "name": "user listing hides KDF hashes and admin-only account creation validates schema",
+      "status": "PASS"
+    },
+    {
+      "name": "missing or incorrect CSRF cannot mutate users or MQTT operations",
+      "status": "PASS"
+    },
+    {
+      "name": "wrong and absent-user login failures are generic without credential disclosure",
+      "status": "PASS"
+    },
+    {
+      "name": "viewer can consult monitor but cannot access console messages or users",
+      "status": "PASS"
+    },
+    {
+      "name": "operator can access MQTT but cannot list create or disable web users",
+      "status": "PASS"
+    },
+    {
+      "name": "last enabled administrator cannot be disabled",
+      "status": "PASS"
+    },
+    {
+      "name": "disabling a web user revokes all existing cookies and prevents login",
+      "status": "PASS"
+    },
+    {
+      "name": "logout expires the cookie revokes the session and requires new login",
+      "status": "PASS"
+    },
+    {
+      "name": "a second server cannot open the same active web-user store",
+      "status": "PASS"
+    },
+    {
+      "name": "restart preserves users but invalidates prior session cookies",
+      "status": "PASS"
+    },
+    {
+      "name": "corrupt oversized symlink and unsafe modes are refused without resetting users",
+      "status": "PASS"
+    },
+    {
+      "name": "sixty-four users are accepted and user sixty-five is refused without rewriting data",
+      "status": "PASS"
+    },
+    {
+      "name": "parallel login attempts are bounded rejected and leave public HTTP responsive",
+      "status": "PASS"
+    }
+  ],
+  "finished_unix": 1792430157,
+  "passed": 18,
+  "total": 18
+}

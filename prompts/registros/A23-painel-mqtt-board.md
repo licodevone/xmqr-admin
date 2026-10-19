@@ -42,3 +42,8 @@ Client/broker e fase8 permanecem separados, sem aceite global antecipado.
 
 Commit/push autorizado; CI da fonte exata será vinculada após execução.
 Sem bump/tag/release nesta fatia de fonte: pacote publicado continua0.11.0.
+
+CI posteriormente confirmada: [39291303909](https://github.com/licodevone/xmqr-admin/actions/runs/39291303909),
+fonte5f98f4a7a3b2a9e12b4cc1ccdb07920edead5098, quatro jobsPASS:validate,
+core-v16,ubuntu-package,mqtt-board. Inclui novo gate real MQTTmTLS e pacotes
+descartáveis. Nenhuma tag/release nova foi criada.

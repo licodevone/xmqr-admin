@@ -1,5 +1,20 @@
 # XMQR Admin
 
+## Fonte A24 — autenticação por usuários
+
+Com `XMQR_ADMIN_WEB_USERS_FILE` apontando para arquivo absoluto em diretório
+privado 0700, o painel usa contas locais e sessões com cookie HttpOnly e CSRF.
+No primeiro acesso, o token local autoriza criar um administrador com senha
+escolhida no navegador. Depois, o bootstrap é fechado e o Bearer antigo não
+contorna o login. Senhas ficam somente como hash Argon2id com salt aleatório.
+
+Observador consulta métricas; operador também usa o console compartilhado;
+administrador gerencia contas. Desativar uma conta revoga suas sessões, e o
+último administrador ativo é protegido. Contas web são independentes das
+credenciais MQTT. [Configuração e limites](docs/web-auth.md).
+O modo token anterior continua quando a variável não é configurada.
+A24 ainda é fonte em validação de CI; não foi publicada nova release/pacote.
+
 ## Fonte A23 — painel e console MQTT local
 
 O painel agora tem visão geral, console MQTT, operações administrativas e

@@ -11,6 +11,7 @@ mod state;
 mod token;
 mod users;
 mod web;
+mod web_auth;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
