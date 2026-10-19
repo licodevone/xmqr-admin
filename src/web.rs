@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
-use crate::{config::Config, monitor, token::Token};
+use crate::{
+    config::Config,
+    monitor,
+    mqtt_console::{Board, BoardError, ConnectRequest, PublishRequest, Snapshot},
+    token::Token,
+};
 use axum::{
     Json, Router,
-    extract::{Request, State},
+    extract::{DefaultBodyLimit, Request, State, rejection::JsonRejection},
     http::{HeaderValue, Method, StatusCode, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::get,
+    routing::{get, post},
 };
 use std::{future::IntoFuture, io, sync::Arc, time::Duration};
 use tokio::sync::{Semaphore, oneshot};
@@ -17,14 +22,16 @@ struct App {
     token: Arc<Token>,
     client: reqwest::Client,
     slots: Arc<Semaphore>,
+    board: Board,
 }
 
-fn routes(config: Config, token: Token) -> Result<Router, reqwest::Error> {
+fn routes(config: Config, token: Token, board: Board) -> Result<Router, reqwest::Error> {
     let app = App {
         config,
         token: Arc::new(token),
         client: monitor::client()?,
         slots: Arc::new(Semaphore::new(16)),
+        board,
     };
     Ok(build(app))
 }
@@ -36,8 +43,13 @@ fn build(app: App) -> Router {
         .route("/assets/app.js", get(js))
         .route("/favicon.svg", get(favicon))
         .route("/api/status", get(status))
+        .route("/api/mqtt", get(mqtt_snapshot))
+        .route("/api/mqtt/connect", post(mqtt_connect))
+        .route("/api/mqtt/disconnect", post(mqtt_disconnect))
+        .route("/api/mqtt/publish", post(mqtt_publish))
         .fallback(|| async { StatusCode::NOT_FOUND })
         .layer(middleware::from_fn_with_state(app.clone(), guard))
+        .layer(DefaultBodyLimit::max(8192))
         .with_state(app)
 }
 
@@ -67,17 +79,47 @@ async fn guarded(app: App, request: Request, next: Next) -> Response {
     {
         return StatusCode::FORBIDDEN.into_response();
     }
-    if !matches!(*request.method(), Method::GET | Method::HEAD) {
+    let mqtt_write = request.method() == Method::POST
+        && matches!(
+            request.uri().path(),
+            "/api/mqtt/connect" | "/api/mqtt/disconnect" | "/api/mqtt/publish"
+        );
+    if !matches!(*request.method(), Method::GET | Method::HEAD) && !mqtt_write {
         return StatusCode::METHOD_NOT_ALLOWED.into_response();
     }
     if request.uri().query().is_some()
         || headers.contains_key(header::TRANSFER_ENCODING)
         || headers.get_all(header::CONTENT_LENGTH).iter().count() > 1
-        || headers
-            .get(header::CONTENT_LENGTH)
-            .is_some_and(|v| v != "0")
+        || (!mqtt_write
+            && headers
+                .get(header::CONTENT_LENGTH)
+                .is_some_and(|v| v != "0"))
     {
         return StatusCode::BAD_REQUEST.into_response();
+    }
+    if mqtt_write {
+        if headers.get(header::ORIGIN).is_none() {
+            return StatusCode::FORBIDDEN.into_response();
+        }
+        if headers.get_all(header::CONTENT_TYPE).iter().count() != 1
+            || !headers.get(header::CONTENT_TYPE).is_some_and(|value| {
+                value.to_str().is_ok_and(|value| {
+                    value
+                        .split(';')
+                        .next()
+                        .is_some_and(|mime| mime.trim() == "application/json")
+                })
+            })
+        {
+            return StatusCode::UNSUPPORTED_MEDIA_TYPE.into_response();
+        }
+        if headers.get(header::CONTENT_LENGTH).is_some_and(|value| {
+            !value
+                .to_str()
+                .is_ok_and(|text| text.parse::<usize>().is_ok_and(|length| length <= 8192))
+        }) {
+            return StatusCode::PAYLOAD_TOO_LARGE.into_response();
+        }
     }
     if request.uri().path().starts_with("/api/") {
         let candidate = headers
@@ -90,7 +132,9 @@ async fn guarded(app: App, request: Request, next: Next) -> Response {
             return StatusCode::UNAUTHORIZED.into_response();
         }
     }
-    next.run(request).await
+    tokio::time::timeout(Duration::from_secs(15), next.run(request))
+        .await
+        .unwrap_or_else(|_| StatusCode::REQUEST_TIMEOUT.into_response())
 }
 
 fn secure_headers(mut response: Response) -> Response {
@@ -113,6 +157,49 @@ fn secure_headers(mut response: Response) -> Response {
 
 async fn status(State(app): State<App>) -> Json<monitor::Status> {
     Json(monitor::status(&app.client, app.config.monitor).await)
+}
+
+async fn mqtt_snapshot(State(app): State<App>) -> Json<Snapshot> {
+    Json(app.board.snapshot().await)
+}
+
+async fn mqtt_connect(
+    State(app): State<App>,
+    request: Result<Json<ConnectRequest>, JsonRejection>,
+) -> Result<Json<Snapshot>, BoardError> {
+    let Json(request) = request.map_err(|_| invalid_json())?;
+    app.board.connect(request).await.map(Json)
+}
+
+async fn mqtt_disconnect(
+    State(app): State<App>,
+    request: Result<Json<serde_json::Value>, JsonRejection>,
+) -> Response {
+    let Ok(Json(request)) = request else {
+        return invalid_json().into_response();
+    };
+    if !request.as_object().is_some_and(serde_json::Map::is_empty) {
+        return StatusCode::BAD_REQUEST.into_response();
+    }
+    match app.board.disconnect().await {
+        Ok(snapshot) => Json(snapshot).into_response(),
+        Err(error) => error.into_response(),
+    }
+}
+
+async fn mqtt_publish(
+    State(app): State<App>,
+    request: Result<Json<PublishRequest>, JsonRejection>,
+) -> Result<Json<Snapshot>, BoardError> {
+    let Json(request) = request.map_err(|_| invalid_json())?;
+    app.board.publish(request).await.map(Json)
+}
+
+fn invalid_json() -> BoardError {
+    BoardError {
+        status: StatusCode::BAD_REQUEST,
+        code: "invalid_request",
+    }
 }
 
 async fn favicon() -> impl IntoResponse {
@@ -143,7 +230,8 @@ async fn js() -> impl IntoResponse {
 
 pub async fn serve(config: Config, token: Token) -> io::Result<()> {
     let address = config.bind;
-    let router = routes(config, token)
+    let board = Board::from_env()?;
+    let router = routes(config, token, board.clone())
         .map_err(|_| io::Error::other("unable to initialize local HTTP client"))?;
     let listener = tokio::net::TcpListener::bind(address).await?;
     let (stop, stopped) = oneshot::channel::<()>();
@@ -153,15 +241,17 @@ pub async fn serve(config: Config, token: Token) -> io::Result<()> {
         })
         .into_future();
     tokio::pin!(server);
-    println!("XMQR Admin local: http://{address} — painel autenticado somente leitura");
-    tokio::select! {
+    println!("XMQR Admin local: http://{address} — painel autenticado e console MQTT opcional");
+    let result = tokio::select! {
         result = &mut server => result,
         () = shutdown() => {
             let _ = stop.send(());
             // A peer keeping an HTTP connection open cannot pin process shutdown.
             tokio::time::timeout(Duration::from_secs(5), &mut server).await.unwrap_or(Ok(()))
         }
-    }
+    };
+    board.shutdown().await;
+    result
 }
 
 async fn shutdown() {
@@ -194,6 +284,7 @@ mod tests {
             token: Arc::new(crate::token::read(&path).unwrap()),
             client: monitor::client().unwrap(),
             slots: Arc::new(Semaphore::new(16)),
+            board: Board::disabled(),
         }
     }
 
@@ -339,6 +430,48 @@ mod tests {
                 .await
                 .unwrap();
             assert_eq!(response.status().as_u16(), code);
+        }
+    }
+
+    #[tokio::test]
+    async fn mqtt_writes_require_local_origin_json_limits_and_authentication() {
+        for (origin, content_type, length, auth, expected) in [
+            (None, "application/json", "2", true, 403),
+            (Some("http://evil.test"), "application/json", "2", true, 403),
+            (Some("http://localhost:9080"), "text/plain", "2", true, 415),
+            (
+                Some("http://localhost:9080"),
+                "application/json",
+                "8193",
+                true,
+                413,
+            ),
+            (
+                Some("http://localhost:9080"),
+                "application/json",
+                "2",
+                false,
+                401,
+            ),
+        ] {
+            let mut request = Request::builder()
+                .method("POST")
+                .uri("/api/mqtt/connect")
+                .header("host", "localhost:9080")
+                .header("content-type", content_type)
+                .header("content-length", length);
+            if let Some(origin) = origin {
+                request = request.header("origin", origin);
+            }
+            if auth {
+                request = request.header("authorization", format!("Bearer {}", "a".repeat(64)));
+            }
+            let response = application()
+                .oneshot(request.body(Body::from("{}")).unwrap())
+                .await
+                .unwrap();
+            assert_eq!(response.status().as_u16(), expected);
+            assert_eq!(response.headers()["cache-control"], "no-store");
         }
     }
 }

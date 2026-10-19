@@ -19,6 +19,50 @@ jobs:
       - run: python3 scripts/test_a22_notices.py
       - run: python3 scripts/test_channel_lifecycle.py
       - run: python3 scripts/test_export.py
+      - name: A23 console and HTTP/child-process contracts
+        run: |
+          cargo build --locked
+          mkdir -p dist
+          python3 -B scripts/verify_mqtt_board.py --admin target/debug/xmqr-admin --report dist/a23-ci-console.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: a23-console-contracts
+          path: dist/a23-ci-console.json
+
+  mqtt-board:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: licodevone/xmqr
+          ref: v0.43.0
+          path: peers/broker
+      - uses: actions/checkout@v4
+        with:
+          repository: licodevone/xmqr-client
+          ref: v0.42.1
+          path: peers/client
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            peers/broker
+            peers/client
+      - run: cargo build --locked
+      - run: cargo build --locked --bins --manifest-path peers/broker/Cargo.toml
+      - run: cargo build --locked --bins --manifest-path peers/client/Cargo.toml
+      - name: A23 real TLS MQTT QoS and ACL integration
+        run: |
+          mkdir -p dist
+          python3 -B scripts/verify_mqtt_board.py --admin target/debug/xmqr-admin --client peers/client/target/debug/mqtt-client --broker peers/broker/target/debug/mqtt-broker --report dist/a23-ci-real-mqtt.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: a23-real-mqtt
+          path: dist/a23-ci-real-mqtt.json
 
   core-v16:
     runs-on: ubuntu-latest

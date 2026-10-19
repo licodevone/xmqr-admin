@@ -1,0 +1,38 @@
+{
+  "schema": "xmqr-admin-mqtt-board-a23-v1",
+  "status": "FAIL",
+  "started_unix": 1792429196,
+  "hashes": {
+    "admin_elf_sha256": "9029a4cfc0422da644b4ab76106ea7c90a8d47f5a5f9b12a2466a3868a8053e8",
+    "fixture_sha256": "fbb1220c57440ff99572dda866a03362cda9c77291422e5cda8df56b0ae565fd",
+    "fake_client_sha256": "4fcb9450fcebe7ea3429bece412c53f77f66e37fa1b3c0cf58bf279ce62c0788",
+    "client_elf_sha256": "d644cbaaa2bacb631f47e362bd266004da978603b76fc6c5fecd91bf10896034",
+    "broker_elf_sha256": "fce0b871be72e5cfc7eb5a8dc46d04280075dd21dbbbb5b3677676952c6e9257"
+  },
+  "real_integration": "requested",
+  "scenarios": [
+    {
+      "name": "console disabled without private profiles",
+      "status": "PASS"
+    },
+    {
+      "name": "exact Host Origin Bearer and security headers",
+      "status": "PASS"
+    },
+    {
+      "name": "query body methods JSON origin and route negatives",
+      "status": "PASS"
+    },
+    {
+      "name": "topic QoS payload and unknown-field bounds",
+      "status": "FAIL",
+      "error_type": "AssertionError",
+      "error_line": 259,
+      "reason": "invalid MQTT input accepted"
+    }
+  ],
+  "error_type": "AssertionError",
+  "finished_unix": 1792429197,
+  "passed": 3,
+  "total": 4
+}

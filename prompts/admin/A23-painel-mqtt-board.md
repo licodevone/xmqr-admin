@@ -1,4 +1,4 @@
-# A23 v1.0 — painel local XMQR e console MQTT
+# A23 v1.2 — painel local XMQR e console MQTT
 
 2026-10-19. Entrada admin0.11.0/main0796d3b, Git limpo. Usuário solicita
 interface semelhante a HiveMQ Web Client/MQTT Board e autoriza agentes paralelos.
@@ -65,3 +65,26 @@ fmt/test/Clippy/buildrelease/inventário, CIexata e evidências. Commit/push ap�
 aceite; versão/tag/release em marco próprio. Não substituir pacote instalado
 ou iniciar instância real sem autorização; usuário autoriza levantar serviço
 web de teste local para visualizar o resultado, preservando broker ativo.
+
+Primeira validação local:35testesRustPASS. Clippy recusou snapshot async sem
+await, dois let _ em retorno unit e assert de vetor vazio. Preservar logs
+/var/tmp/a23-tests-1.log e /var/tmp/a23-clippy-1.log; corrigir sem enfraquecer
+o gate. snapshot pode retornar std::future::Ready para manter contrato await.
+Revisão também exigiu fechar stdin antes de aguardar EOF do publisher e
+revalidar estado closed após lock, evitando filhos criados durante shutdown.
+
+Primeira fixture HTTP preservada em dist/a23-integration-1.json:3PASS, depois
+FAIL no código de schema desconhecido (Axum422, fixture400; sem processo
+iniciado). Padronizar rejeições JSON como400/invalid_request para não expor
+detalhes do parser; não aceitar campo extra nem flexibilizar teste. ClientIDs
+com sufixos devem ter até23bytes para compatibilidade com MQTT3.1.1.
+
+Browser1 foi impedido antes de abrir página: Playwright pede Chromium1234,
+mas o ambiente tem1243/1248. RelatórioFAIL preservado. Usar caminho explícito
+do Chromium já instalado, sem instalar ou declarar QA visual antecipadamente.
+
+Fixture2 preservada:8PASS, depois FAIL porque o listener tem lifetime10s e
+o publisher tinha prazo12s. Manter a proteção do listener; reduzir prazo do
+publisher para6s (até3s adicionais de recolhimento), para retornar erroHTTP
+antes do fechamento. Não flexibilizar teste nem ampliar conexões do servidor.
+Browser2:9cenáriosPASS emChromium1248, desktop/mobile e conteúdo semXSS.

@@ -22,7 +22,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10.9"
 subtle = "2.6.1"
-tokio = { version = "1.53.1", features = ["macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
+tokio = { version = "1.53.1", features = ["io-util", "process", "macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
 toml = "0.9.8"
 zeroize = "1.8.2"
 

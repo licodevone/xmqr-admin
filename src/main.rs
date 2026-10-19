@@ -6,6 +6,7 @@ mod cli;
 mod config;
 mod listener;
 mod monitor;
+mod mqtt_console;
 mod state;
 mod token;
 mod users;

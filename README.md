@@ -1,5 +1,26 @@
 # XMQR Admin
 
+## Fonte A23 — painel e console MQTT local
+
+O painel agora tem visão geral, console MQTT, operações administrativas e
+configuração/acesso. O console pode assinar um filtro continuamente, mostrar
+até 200 mensagens recentes e publicar texto até 4096 bytes com QoS 0/1/2 e
+retained. Conexão só aparece ativa após SUBACK; publicação só aparece concluída
+após sucesso do client, distinguindo envio QoS0 de confirmação MQTT QoS1/2.
+Não há confirmação de processamento do dispositivo.
+
+O backend permanece no Ubuntu/WSL e o navegador Windows abre a porta 9080.
+9090/ready continua sendo a saúde do broker e 8883 seu listener TLS. O console
+usa o `mqtt-client` instalado por perfis privados preparados pelo operador,
+sem enviar credenciais ao browser ou abrir listeners novos no broker.
+Sem configurar os perfis, o console mostra que está desabilitado.
+[Configuração e uso](docs/mqtt-board.md).
+
+A consulta administrativa de métricas continua somente leitura. O envio de
+mensagens MQTT é uma operação explícita do console; CRUD de usuários/ACL,
+backups e canal administrativo continuam no CLI. Esta mudança de fonte está
+em validação, ainda sem nova versão/tag/release ou substituição do pacote 0.11.0.
+
 ## Release experimental 0.11.0 — core v16
 
 Compatibilidade A21 com o core público broker0.43.0 fixado em
@@ -154,10 +175,10 @@ dinâmico do modo seguro. Senhas são pedidas no terminal, não por argumento.
 Mudanças em arquivos legados exigem reiniciar o broker. Backup exige broker
 parado, verificação usa a cópia e restore cria um diretório novo.
 
-Há inventário e ações locais de sessão/retained; não há emissão de certificados, controle
-remoto de ESP32, painel de publicação MQTT ou declaração de produção. O painel
-é somente leitura e não abre WAL, não modifica configuração e não reinicia
-serviços. Client continua sendo quem publica/recebe mensagens MQTT.
+Há inventário e ações locais de sessão/retained pelo CLI. A fonte A23 acrescenta
+o console de publicação/assinatura, executando o client por perfis privados.
+O painel não abre WAL, modifica configuração do broker ou reinicia serviços.
+Não há emissão de certificados nem controle de firmware do ESP32 pela interface.
 
 ## Três projetos, sem conflito
 
@@ -166,13 +187,14 @@ define a evolução administrativa inspirada em Dynamic Security/mosquitto_ctrl:
 bundle seguro, grupos/papéis/ACL, canal autenticado, revogação, auditoria e
 gestão de sessões/retained. A fase 5 foi aceita no recorte local Linux/WSL
 conforme o [aceite](https://github.com/licodevone/xmqr/blob/main/docs/phase5-acceptance.md).
-O painel web permanece somente leitura; operações online usam o CLI.
+O painel administrativo observa agregados; alterações administrativas usam o
+CLI. O console MQTT A23 publica e assina mensagens separadamente dessas ações.
 
-`xmqr` contém o broker publicado 0.29.0 e seu utilitário `mqtt-admin` legado.
-Esta versão instala **`xmqr-admin`** 0.10.0 independente, lado a lado.
-`xmqr-client` contém o cliente `mqtt-client` publicado 0.26.0. Nenhum deles é substituído.
+`xmqr` contém o broker publicado 0.43.0 e seu utilitário `mqtt-admin` legado.
+O admin publicado é **`xmqr-admin`** 0.11.0 independente, lado a lado.
+`xmqr-client` publica `mqtt-client` 0.42.1. A23 ainda é fonte em validação.
 Não é Cargo workspace. Reutilizamos a biblioteca do core por dependência Git
-fixada no commit 9215d4c1e6fb59f3ab73d684ecfbaf9ed38e72b2, sem dependência local.
+fixada no commit ba6ef50204dec2c6385b272e595260b9def1e794, sem dependência local.
 [Origem dos arquivos extraídos](ORIGIN.json); [fluxo por prompts](prompts/admin/A00-contexto.md).
 
 ## Compilar no Ubuntu/WSL

@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "steps": [
+    "token invalido recusado",
+    "login sem persistir token",
+    "assinatura ativa apos SUBACK e conteudo remoto sem HTML",
+    "publicacao confirmada pela API",
+    "busca e pausa visual funcionais",
+    "layout mobile sem overflow",
+    "limpeza local nao reapresenta backlog",
+    "logout encerra assinatura e limpa acesso/dados",
+    "sem excecoes ou scripts remotos"
+  ],
+  "backend": "servidor real A23 + fake CLI proprio; gate MQTT real separado",
+  "browser": "Chromium/Playwright",
+  "operator_data": false
+}
