@@ -2,7 +2,7 @@
 use crate::{
     config::Config,
     monitor,
-    mqtt_console::{Board, BoardError, ConnectRequest, PublishRequest, Snapshot},
+    mqtt_console::{Availability, Board, BoardError, ConnectRequest, PublishRequest, Snapshot},
     token::Token,
     web_auth::{
         Auth, AuthConfig, AuthError, CreateUserRequest, LoginRequest, SessionInfo, SetupRequest,
@@ -195,8 +195,49 @@ fn secure_headers(mut response: Response) -> Response {
     response
 }
 
-async fn status(State(app): State<App>) -> Json<monitor::Status> {
-    Json(monitor::status(&app.client, app.config.monitor).await)
+#[derive(serde::Serialize)]
+struct StatusReply {
+    #[serde(flatten)]
+    monitor: monitor::Status,
+    systems: Systems,
+}
+
+#[derive(serde::Serialize)]
+struct Systems {
+    admin: Availability,
+    broker: Availability,
+    client: Availability,
+}
+
+impl StatusReply {
+    fn new(monitor: monitor::Status, client: Availability) -> Self {
+        let broker = Availability {
+            online: monitor.reachable && monitor.ready,
+            reason: if !monitor.reachable {
+                "monitor_unavailable"
+            } else if monitor.ready {
+                "ready"
+            } else {
+                "not_ready"
+            },
+        };
+        Self {
+            monitor,
+            systems: Systems {
+                admin: Availability {
+                    online: true,
+                    reason: "available",
+                },
+                broker,
+                client,
+            },
+        }
+    }
+}
+
+async fn status(State(app): State<App>) -> Json<StatusReply> {
+    let observed = monitor::status(&app.client, app.config.monitor).await;
+    Json(StatusReply::new(observed, app.board.availability()))
 }
 
 async fn mqtt_snapshot(State(app): State<App>) -> Json<Snapshot> {
@@ -406,6 +447,55 @@ mod tests {
     use axum::body::Body;
     use std::os::unix::fs::PermissionsExt;
     use tower::ServiceExt;
+
+    #[test]
+    fn systems_preserve_monitor_contract_and_distinguish_not_ready_from_unavailable() {
+        for (reachable, ready, online, reason, error) in [
+            (true, true, true, "ready", None),
+            (true, false, false, "not_ready", None),
+            (
+                false,
+                false,
+                false,
+                "monitor_unavailable",
+                Some("monitor_timeout"),
+            ),
+            (
+                false,
+                true,
+                false,
+                "monitor_unavailable",
+                Some("monitor_invalid_response"),
+            ),
+        ] {
+            let monitor = monitor::Status {
+                admin_version: "test",
+                reachable,
+                ready,
+                error,
+                metrics: [("xmqr_sessions".into(), 7)].into_iter().collect(),
+            };
+            let original = serde_json::to_value(&monitor).unwrap();
+            let value =
+                serde_json::to_value(StatusReply::new(monitor, Board::disabled().availability()))
+                    .unwrap();
+            for (key, expected) in original.as_object().unwrap() {
+                assert_eq!(&value[key], expected);
+            }
+            assert_eq!(
+                value.as_object().unwrap().len(),
+                original.as_object().unwrap().len() + 1
+            );
+            assert_eq!(
+                value["systems"],
+                serde_json::json!({
+                    "admin":{"online":true,"reason":"available"},
+                    "broker":{"online":online,"reason":reason},
+                    "client":{"online":false,"reason":"disabled"},
+                })
+            );
+        }
+    }
 
     fn test_state() -> App {
         let dir = tempfile::tempdir().unwrap();

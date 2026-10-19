@@ -1,5 +1,14 @@
 # XMQR Admin
 
+## Fonte A25 — disponibilidade no painel
+
+A Visão geral apresenta indicadores ON-LINE/OFF-LINE para o broker,
+o client da assinatura compartilhada e o servidor admin. Cada indicador
+explica a verificação usada. Uma falha de consulta invalida os estados
+anteriores; o painel não mantém uma leitura antiga como confirmação atual.
+[Critérios e limites](docs/system-status.md) e [validação local](prompts/registros/A25-status-online-offline.md).
+Aceite local A25 concluído, CI pendente; sem nova release ou substituição do pacote instalado.
+
 ## Fonte A24 — autenticação por usuários
 
 Com `XMQR_ADMIN_WEB_USERS_FILE` apontando para arquivo absoluto em diretório
@@ -13,7 +22,8 @@ administrador gerencia contas. Desativar uma conta revoga suas sessões, e o
 último administrador ativo é protegido. Contas web são independentes das
 credenciais MQTT. [Configuração e limites](docs/web-auth.md).
 O modo token anterior continua quando a variável não é configurada.
-A24 ainda é fonte em validação de CI; não foi publicada nova release/pacote.
+A24 passou na [CI do commit exato](https://github.com/licodevone/xmqr-admin/actions/runs/39292851127);
+não foi publicada nova release/pacote para essa funcionalidade.
 
 ## Fonte A23 — painel e console MQTT local
 

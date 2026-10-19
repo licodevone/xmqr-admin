@@ -1,0 +1,52 @@
+{
+  "schema": "xmqr-admin-system-status-a25-v1",
+  "status": "PASS",
+  "started_unix": 1792431212,
+  "hashes": {
+    "admin_elf_sha256": "70fd7473ee19e4ced544886dc7eb0f6a0ec50eacd6a215b70d85f6b17f9e4983",
+    "fixture_sha256": "86d68570f55148501642eced61e0bebd2efafc78761f776392f3835637d29540",
+    "auth_helper_sha256": "46c56db025da720c42b9ac08c67a8aa86feda4e2eddebf34920eb1939c712e09"
+  },
+  "scope": "real admin HTTP; owned HTTP monitor and deterministic child CLI; no real MQTT network",
+  "scenarios": [
+    {
+      "name": "aggregate requires authentication and preserves legacy token access",
+      "status": "PASS"
+    },
+    {
+      "name": "viewer receives only fixed aggregates and cannot read MQTT payloads",
+      "status": "PASS"
+    },
+    {
+      "name": "ready monitor confirms broker and admin independently",
+      "status": "PASS"
+    },
+    {
+      "name": "reachable not-ready monitor does not report broker online",
+      "status": "PASS"
+    },
+    {
+      "name": "transport failure invalid metrics and timeout mean unconfirmed monitor",
+      "status": "PASS"
+    },
+    {
+      "name": "client stays offline while connecting and becomes online only after SUBACK",
+      "status": "PASS"
+    },
+    {
+      "name": "disconnect updates aggregate and reaps owned subscriber",
+      "status": "PASS"
+    },
+    {
+      "name": "unexpected CLI exit reports client error without changing healthy admin or broker",
+      "status": "PASS"
+    },
+    {
+      "name": "viewer aggregate polling does not renew the console subscription lease",
+      "status": "PASS"
+    }
+  ],
+  "finished_unix": 1792431278,
+  "passed": 9,
+  "total": 9
+}

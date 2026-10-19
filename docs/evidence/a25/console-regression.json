@@ -1,0 +1,68 @@
+{
+  "schema": "xmqr-admin-mqtt-board-a23-v1",
+  "status": "PASS",
+  "started_unix": 1792431298,
+  "hashes": {
+    "admin_elf_sha256": "70fd7473ee19e4ced544886dc7eb0f6a0ec50eacd6a215b70d85f6b17f9e4983",
+    "fixture_sha256": "fcfd5280a1123b15c25924511b592d1406835e863dd8332925a7c2e9dc3d76f6",
+    "fake_client_sha256": "4fcb9450fcebe7ea3429bece412c53f77f66e37fa1b3c0cf58bf279ce62c0788"
+  },
+  "real_integration": "not requested",
+  "scenarios": [
+    {
+      "name": "console disabled without private profiles",
+      "status": "PASS"
+    },
+    {
+      "name": "exact Host Origin Bearer and security headers",
+      "status": "PASS"
+    },
+    {
+      "name": "query body methods JSON origin and route negatives",
+      "status": "PASS"
+    },
+    {
+      "name": "topic QoS payload and unknown-field bounds",
+      "status": "PASS"
+    },
+    {
+      "name": "connection becomes active only after real SUBACK marker",
+      "status": "PASS"
+    },
+    {
+      "name": "JSONL text binary representation and bounded message queue",
+      "status": "PASS"
+    },
+    {
+      "name": "direct argv private profiles stdin and publication acknowledgements",
+      "status": "PASS"
+    },
+    {
+      "name": "CLI failure exposes only generic error and no successful publication",
+      "status": "PASS"
+    },
+    {
+      "name": "publication concurrency bound and deadline reap owned child",
+      "status": "PASS"
+    },
+    {
+      "name": "disconnect and logout cleanup are idempotent",
+      "status": "PASS"
+    },
+    {
+      "name": "unexpected subscriber exit becomes visible generic error",
+      "status": "PASS"
+    },
+    {
+      "name": "subscription lease expires without browser polling",
+      "status": "PASS"
+    },
+    {
+      "name": "server shutdown reaps owned subscriber",
+      "status": "PASS"
+    }
+  ],
+  "finished_unix": 1792431370,
+  "passed": 13,
+  "total": 13
+}

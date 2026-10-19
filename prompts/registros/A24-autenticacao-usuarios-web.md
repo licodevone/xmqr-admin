@@ -49,3 +49,8 @@ Pacotesinstalados0.33/0.28/0.10intactos; preview é fonteadmin0.11.0 emvalidaç�
 Commit/pushautorizados; CIexata será vinculada após conclusão, sem PASS
 antecipado. Não criada nova tag/release nesta fatia de fonte. Fase8/C148 do
 client permanece em desenvolvimento, sem aceite global ou release antecipada.
+
+Verificação posterior em 2026-10-19: commit52fa7506aecb8c5c1318863692fca9d333d6154f
+com [CI39292851127](https://github.com/licodevone/xmqr-admin/actions/runs/39292851127)
+concluída com sucesso nos quatro jobs. Fonte A24 aceita; distribuição permanece
+no marco anterior, sem nova versão/tag/release.

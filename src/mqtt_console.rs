@@ -79,6 +79,13 @@ pub struct Snapshot {
     dropped_total: u64,
 }
 
+/// Agregado público sem tópicos, mensagens ou acesso aos perfis privados.
+#[derive(Clone, Copy, Serialize)]
+pub struct Availability {
+    pub online: bool,
+    pub reason: &'static str,
+}
+
 pub struct BoardError {
     pub status: StatusCode,
     pub code: &'static str,
@@ -268,6 +275,25 @@ impl Board {
 
     pub fn snapshot(&self) -> std::future::Ready<Snapshot> {
         std::future::ready(self.snapshot_now(true))
+    }
+
+    pub fn availability(&self) -> Availability {
+        let state = self
+            .inner
+            .state
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let reason = match state.snapshot.status {
+            "connected" => "connected",
+            "connecting" => "connecting",
+            "disconnected" => "disconnected",
+            "disabled" => "disabled",
+            _ => "error",
+        };
+        Availability {
+            online: reason == "connected",
+            reason,
+        }
     }
 
     pub async fn connect(&self, request: ConnectRequest) -> Result<Snapshot, BoardError> {
@@ -651,6 +677,43 @@ async fn subscribe_loop(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn availability_tracks_subscription_state_without_exposing_messages_or_renewing_lease() {
+        let board = Board::disabled();
+        let touched = Instant::now().checked_sub(LEASE).unwrap();
+        {
+            let mut state = board.inner.state.lock().unwrap();
+            state.touched = touched;
+            state.snapshot.topic = Some("private/topic".into());
+            state.push(
+                "private/topic".into(),
+                "private-payload".into(),
+                1,
+                false,
+                "received",
+            );
+        }
+        for (status, online, reason) in [
+            ("disabled", false, "disabled"),
+            ("disconnected", false, "disconnected"),
+            ("connecting", false, "connecting"),
+            ("connected", true, "connected"),
+            ("error", false, "error"),
+            ("unexpected", false, "error"),
+        ] {
+            board.inner.state.lock().unwrap().snapshot.status = status;
+            let aggregate = serde_json::to_value(board.availability()).unwrap();
+            assert_eq!(
+                aggregate,
+                serde_json::json!({"online":online,"reason":reason})
+            );
+            let state = board.inner.state.lock().unwrap();
+            assert_eq!(state.touched, touched);
+            assert_eq!(state.messages.len(), 1);
+            assert_eq!(state.messages.front().unwrap().payload, "private-payload");
+        }
+    }
 
     #[test]
     fn generated_client_ids_fit_mqtt311_with_role_suffixes() {

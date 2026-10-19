@@ -25,6 +25,7 @@ jobs:
           mkdir -p dist
           python3 -B scripts/verify_mqtt_board.py --admin target/debug/xmqr-admin --report dist/a23-ci-console.json
           python3 -B scripts/verify_web_auth.py --admin target/debug/xmqr-admin --report dist/a24-ci-auth.json
+          python3 -B scripts/verify_system_status.py --admin target/debug/xmqr-admin --report dist/a25-ci-status.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -35,6 +36,11 @@ jobs:
         with:
           name: a24-user-auth-contracts
           path: dist/a24-ci-auth.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: a25-system-status-contracts
+          path: dist/a25-ci-status.json
 
   mqtt-board:
     runs-on: ubuntu-latest

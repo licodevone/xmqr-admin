@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "steps": [
+    "estados iniciais sem inferir disponibilidade pelo HTML",
+    "login real e agregado HTTP do admin com client ainda desconectado",
+    "conexao permanece OFF-LINE ate o marcador SUBACK do processo real filho",
+    "HTTP real do monitor distingue nao pronto e indisponivel sem derrubar admin ou assinatura",
+    "falha de status invalida imediatamente mesmo com consulta MQTT pendente (interceptacao)",
+    "falha isolada na API MQTT nao substitui agregado de status valido (interceptacao)",
+    "estrutura invalida e texto remoto sem HTML invalidam indicadores e permitem recuperacao (interceptacao)",
+    "metrica numerica recebida como string invalidam indicadores e permitem recuperacao (interceptacao)",
+    "readiness fora de 0 ou 1 invalidam indicadores e permitem recuperacao (interceptacao)",
+    "JSON invalido invalidam indicadores e permitem recuperacao (interceptacao)",
+    "timeout real do AbortController invalidam indicadores e permitem recuperacao (interceptacao)",
+    "evento offline invalida imediatamente e resposta anterior nao restaura estado antigo (evento controlado)",
+    "rede offline real do contexto Chromium e recuperacao",
+    "falha real do processo filho reflete client OFF-LINE sem invalidar admin e broker",
+    "desktop e mobile sem overflow e indicadores com texto alem de cor",
+    "logout limpa estados e segredos sem consultas sobrepostas"
+  ],
+  "hashes": {
+    "admin_elf_sha256": "2f9e677a3b20fc61c3c7f16c5c8dd890c3bf3f181d3274f844138b313fb2b404",
+    "aggregate_fixture_sha256": "86d68570f55148501642eced61e0bebd2efafc78761f776392f3835637d29540",
+    "browser_fixture_sha256": "a1feefc15e7e41764105912cdf30ab7ce2f820a7a89244a14e00f776b994e1fc"
+  },
+  "scope": "Admin e HTTP de monitor reais, CLI deterministica privada; falhas de resposta e eventos explicitamente identificados. Sem broker MQTT real neste ensaio.",
+  "browser": "Chromium/Playwright",
+  "max_parallel_status": 1
+}

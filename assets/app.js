@@ -12,6 +12,8 @@ let connectionPending = false;
 let publishPending = false;
 let leaving = false;
 let pollTimer = null;
+let statusRevision = 0;
+let browserOffline = typeof navigator!=="undefined" && navigator.onLine===false;
 let paused = false;
 let localMessages = [];
 const seenMessages = new Set();
@@ -69,8 +71,8 @@ function updatePermissions() {
 }
 
 function lock() {
-  generation++;accessToken="";sessionInfo=null;
-  clearTimeout(pollTimer);
+  generation++;accessToken="";sessionInfo=null;statusRevision++;
+  clearTimeout(pollTimer);resetSystems();
   for(const id of ["token","login-password","setup-token","setup-password","setup-password-confirm","new-password","new-password-confirm"]) byId(id).value="";
   byId("workspace").hidden=true;byId("login-section").hidden=false;
   for(const id of ["publish-payload","publish-topic","subscribe-topic","message-search"]) byId(id).value="";
@@ -88,18 +90,75 @@ function lock() {
   if(authMode!=="loading") byId(focus).focus();
 }
 
+const systemDetails={
+  admin:{available:"O servidor local respondeu à consulta autenticada."},
+  broker:{ready:"O monitor confirmou que o broker está pronto para operar.",not_ready:"O monitor respondeu, mas o broker ainda não está pronto para operar.",monitor_unavailable:"Sem leitura válida do monitor. Verifique seu endereço e a instância do broker."},
+  client:{connected:"A assinatura compartilhada do console foi confirmada por SUBACK.",connecting:"Aguardando SUBACK da assinatura compartilhada. Ainda sem confirmação de conexão.",disconnected:"A assinatura compartilhada do console está desconectada.",disabled:"O client do console não está configurado no servidor.",error:"A assinatura compartilhada do console apresentou uma falha."}
+};
+
+function setSystem(name,state,detail) {
+  byId("system-"+name).dataset.state=state;
+  const badge=byId("system-"+name+"-status"),description=byId("system-"+name+"-detail");
+  const text=state==="online"?"ON-LINE":state==="offline"?"OFF-LINE":"Aguardando";
+  if(badge.textContent!==text) badge.textContent=text;
+  if(description.textContent!==detail) description.textContent=detail;
+}
+
+function resetSystems() {
+  setSystem("broker","unknown","Aguardando uma consulta autenticada ao monitor do broker.");
+  setSystem("client","unknown","Aguardando confirmação da assinatura compartilhada.");
+  setSystem("admin","unknown","Aguardando resposta autenticada do servidor local.");
+  byId("availability").dataset.state="unknown";
+  byId("overview-title").textContent="Aguardando leitura";
+  byId("broker-description").textContent="A disponibilidade será verificada no monitor do broker.";
+  byId("monitor-help").hidden=true;
+}
+
+function invalidateSystems(reason="status_unavailable") {
+  const offline=reason==="network_offline";
+  setSystem("admin","offline",offline?"O navegador está sem conexão. Não há confirmação do servidor local.":"Sem resposta válida do servidor local. Verifique a conexão e o XMQR Admin.");
+  setSystem("broker","offline","Sem confirmação pelo admin. Isso não confirma que o broker tenha parado.");
+  setSystem("client","offline","Sem confirmação pelo admin. O estado da assinatura compartilhada é desconhecido.");
+  byId("availability").dataset.state="offline";
+  byId("overview-title").textContent="Disponibilidade sem confirmação";
+  byId("broker-description").textContent=offline?"Navegador sem conexão. Uma nova consulta confirmará os estados quando a conexão voltar.":"Não foi possível validar a consulta ao admin. Os estados anteriores foram descartados.";
+  byId("monitor-help").hidden=true;
+  for(const item of document.querySelectorAll("[data-metric]")) item.textContent="—";
+  byId("commit-total").textContent="Commits duráveis: —";
+  byId("sample-time").textContent="Última tentativa sem confirmação: "+new Date().toLocaleTimeString("pt-BR");
+}
+
+function validStatus(data) {
+  const record=value=>value!==null&&typeof value==="object"&&!Array.isArray(value);
+  if(!record(data)||typeof data.reachable!=="boolean"||typeof data.ready!=="boolean"||(!data.reachable&&data.ready)||!record(data.metrics)||typeof data.admin_version!=="string"||!data.admin_version||!record(data.systems)) return false;
+  const names=["xmqr_connections_active","xmqr_sessions","xmqr_retained_messages","xmqr_offline_messages","xmqr_inflight_messages","xmqr_persistence_commits_total","xmqr_persistence_errors_total","xmqr_ready"];
+  if(data.reachable) {
+    if(Object.keys(data.metrics).length!==names.length||!names.every(name=>Object.hasOwn(data.metrics,name)&&typeof data.metrics[name]==="number"&&Number.isInteger(data.metrics[name])&&data.metrics[name]>=0)) return false;
+    if(![0,1].includes(data.metrics.xmqr_ready)||(data.ready&&data.metrics.xmqr_ready!==1)) return false;
+  } else if(Object.keys(data.metrics).length!==0) return false;
+  for(const name of ["admin","broker","client"]) {
+    const system=data.systems[name];
+    if(!record(system)||typeof system.online!=="boolean"||typeof system.reason!=="string"||!Object.hasOwn(systemDetails[name],system.reason)) return false;
+  }
+  if(data.systems.admin.online!==true||data.systems.admin.reason!=="available") return false;
+  const expectedBroker=data.reachable?(data.ready?"ready":"not_ready"):"monitor_unavailable";
+  if(data.systems.broker.reason!==expectedBroker||data.systems.broker.online!==(data.reachable&&data.ready)) return false;
+  return data.systems.client.online===(data.systems.client.reason==="connected");
+}
+
 function renderStatus(data) {
-  const available=data.reachable===true;
-  const ready=available&&data.ready===true;
-  const metrics=data.metrics&&typeof data.metrics==="object"?data.metrics:{};
+  if(!validStatus(data)) {invalidateSystems();return false;}
+  for(const name of ["broker","client","admin"]) {const system=data.systems[name];setSystem(name,system.online?"online":"offline",systemDetails[name][system.reason]);}
+  const available=data.reachable,ready=data.ready,metrics=data.metrics;
   byId("availability").dataset.state=ready?"ready":available?"unready":"offline";
   byId("overview-title").textContent=ready?"Broker pronto para operar":available?"Monitor ativo, broker não está pronto":"Monitor do broker indisponível";
-  byId("broker-description").textContent=ready?"O ator e o armazenamento responderam à verificação.":available?"Verifique a instância do broker. O painel não reinicia serviços automaticamente.":"Sem leitura válida. Confira o monitor opcional e seu endereço local.";
+  byId("broker-description").textContent=ready?"O ator e o armazenamento responderam à verificação.":available?"Verifique a instância do broker. O painel não reinicia serviços automaticamente.":"Sem leitura válida do monitor. Confira o monitor opcional e seu endereço local.";
   byId("monitor-help").hidden=available;
   for(const item of document.querySelectorAll("[data-metric]")) item.textContent=available&&Object.hasOwn(metrics,item.dataset.metric)?String(metrics[item.dataset.metric]):"—";
   byId("commit-total").textContent="Commits duráveis: "+(available&&Object.hasOwn(metrics,"xmqr_persistence_commits_total")?String(metrics.xmqr_persistence_commits_total):"—");
   byId("sample-time").textContent="Última consulta: "+new Date().toLocaleTimeString("pt-BR");
-  if(typeof data.admin_version==="string") {byId("version-sidebar").textContent="Versão "+data.admin_version;byId("version-footer").textContent=data.admin_version;}
+  byId("version-sidebar").textContent="Versão "+data.admin_version;byId("version-footer").textContent=data.admin_version;
+  return true;
 }
 
 function emptyMessages(searching) {
@@ -197,17 +256,27 @@ function schedulePoll() {clearTimeout(pollTimer);if(hasSession()&&!leaving) poll
 
 async function refresh() {
   if(pending||!hasSession()||leaving) return false;
-  pending=true;byId("refresh").disabled=true;const epoch=generation;
+  pending=true;byId("refresh").disabled=true;const epoch=generation,statusEpoch=statusRevision;
   try {
-    const tasks=[api("/api/status",{timeout:5000})];if(canMqtt()) tasks.push(api("/api/mqtt",{timeout:5000}));
+    let statusWasValid=false;
+    const applyStatus=data=>{
+      if(epoch!==generation||!hasSession()||leaving) return;
+      statusWasValid=!browserOffline&&statusEpoch===statusRevision&&validStatus(data);
+      if(statusWasValid) {
+        renderStatus(data);byId("login-section").hidden=true;byId("workspace").hidden=false;
+        message(authMode==="users"?"Sessão autenticada nesta estação.":"O token fica apenas na memória desta página.");
+      } else {
+        invalidateSystems(browserOffline?"network_offline":"status_unavailable");
+        if(byId("workspace").hidden) message("Não foi possível consultar o painel local. Confira se ele está em execução.",true);
+      }
+    };
+    const statusRequest=api("/api/status",{timeout:5000}).then(data=>{applyStatus(data);return data;},error=>{applyStatus(null);throw error;});
+    const tasks=[statusRequest];if(canMqtt()) tasks.push(api("/api/mqtt",{timeout:5000}));
     const results=await Promise.allSettled(tasks);
     if(epoch!==generation||!hasSession()||leaving) return false;
-    const status=results[0],mqtt=results[1];
-    if(status.status==="fulfilled"&&status.value) {
-      renderStatus(status.value);byId("login-section").hidden=true;byId("workspace").hidden=false;
-      message(authMode==="users"?"Sessão autenticada nesta estação.":"O token fica apenas na memória desta página.");
-    } else if(byId("workspace").hidden) {message("Não foi possível consultar o painel local. Confira se ele está em execução.",true);return false;}
-    else renderStatus({reachable:false,ready:false,metrics:{}});
+    const mqtt=results[1];
+    if(browserOffline||statusEpoch!==statusRevision) invalidateSystems(browserOffline?"network_offline":"status_unavailable");
+    if(!statusWasValid&&byId("workspace").hidden) return false;
     if(canMqtt()) {
       if(mqtt?.status==="fulfilled"&&mqtt.value) renderMqtt(mqtt.value);
       else {byId("connection-state").textContent="Consulta indisponível";byId("connection-state").dataset.state="error";setFeedback("console-message","Não foi possível consultar o console. Verifique o servidor; a interface não repete publicações.","error");}
@@ -218,7 +287,7 @@ async function refresh() {
 
 function acceptSession(data) {
   if(!data||typeof data.username!=="string"||typeof data.display_name!=="string"||!Object.hasOwn(roleNames,data.role)||typeof data.csrf_token!=="string"||!data.csrf_token) throw new Error("invalid_session");
-  generation++;accessToken="";sessionInfo={username:data.username,display_name:data.display_name,role:data.role,csrf_token:data.csrf_token};setupRequired=false;
+  generation++;resetSystems();accessToken="";sessionInfo={username:data.username,display_name:data.display_name,role:data.role,csrf_token:data.csrf_token};setupRequired=false;
   authForms();updatePermissions();showView("overview");
 }
 
@@ -386,6 +455,8 @@ window.addEventListener("pagehide",()=>{
   for(const id of ["token","login-password","setup-token","setup-password","setup-password-confirm","new-password","new-password-confirm"]) byId(id).value="";
 });
 window.addEventListener("pageshow",event=>{if(event.persisted){leaving=false;lock();void initializeAuth();}});
+window.addEventListener("offline",()=>{browserOffline=true;statusRevision++;if(hasSession()) invalidateSystems("network_offline");});
+window.addEventListener("online",()=>{browserOffline=false;statusRevision++;if(hasSession()&&!leaving) void refresh();});
 for(const button of document.querySelectorAll("[data-view]")) button.addEventListener("click",()=>showView(button.dataset.view));
 byId("panel-address").textContent=window.location.origin;
 authForms();updatePermissions();void initializeAuth();
