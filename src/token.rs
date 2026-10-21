@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
+#[cfg(unix)]
+use std::fs;
 use std::{
-    fs::{self, File},
+    fs::File,
     io::{self, Read},
     path::Path,
 };
@@ -10,6 +12,7 @@ use zeroize::Zeroizing;
 pub struct Token(Zeroizing<Vec<u8>>);
 
 impl Token {
+    #[cfg_attr(windows, allow(dead_code))]
     pub fn as_str(&self) -> &str {
         std::str::from_utf8(&self.0).expect("validated hexadecimal token")
     }
@@ -59,7 +62,12 @@ fn private_file(path: &Path) -> io::Result<File> {
     Ok(file)
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
+fn private_file(path: &Path) -> io::Result<File> {
+    crate::windows_private::open(path, false, false)
+}
+
+#[cfg(not(any(unix, windows)))]
 fn private_file(_: &Path) -> io::Result<File> {
     Err(io::Error::new(
         io::ErrorKind::Unsupported,
@@ -101,7 +109,23 @@ pub fn create(path: &Path) -> io::Result<()> {
     File::open(parent)?.sync_all()
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
+pub fn create(path: &Path) -> io::Result<()> {
+    use rand_core::{OsRng, RngCore};
+    use std::{fmt::Write as _, io::Write};
+    let mut file = crate::windows_private::open(path, true, true)?;
+    let mut random = Zeroizing::new([0_u8; 32]);
+    OsRng.fill_bytes(random.as_mut());
+    let mut value = Zeroizing::new(String::with_capacity(65));
+    for byte in random.iter() {
+        write!(&mut *value, "{byte:02x}").expect("String formatting cannot fail");
+    }
+    value.push('\n');
+    file.write_all(value.as_bytes())?;
+    file.sync_all()
+}
+
+#[cfg(not(any(unix, windows)))]
 pub fn create(_: &Path) -> io::Result<()> {
     Err(io::Error::new(
         io::ErrorKind::Unsupported,

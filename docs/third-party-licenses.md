@@ -24,6 +24,7 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | base64 | 0.22.1 | `MIT OR Apache-2.0` |
 | base64 | 0.23.1 | `MIT OR Apache-2.0` |
 | base64ct | 1.8.3 | `Apache-2.0 OR MIT` |
+| bitflags | 1.3.2 | `MIT/Apache-2.0` |
 | bitflags | 2.13.2 | `MIT OR Apache-2.0` |
 | blake2 | 0.10.6 | `MIT OR Apache-2.0` |
 | block-buffer | 0.10.4 | `MIT OR Apache-2.0` |
@@ -205,6 +206,7 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | winapi-i686-pc-windows-gnu | 0.4.0 | `MIT/Apache-2.0` |
 | winapi-x86_64-pc-windows-gnu | 0.4.0 | `MIT/Apache-2.0` |
 | windows-link | 0.2.1 | `MIT OR Apache-2.0` |
+| windows-permissions | 0.2.4 | `MIT` |
 | windows-sys | 0.52.0 | `MIT OR Apache-2.0` |
 | windows-sys | 0.61.2 | `MIT OR Apache-2.0` |
 | windows-targets | 0.52.6 | `MIT OR Apache-2.0` |
@@ -218,6 +220,7 @@ Este inventário não substitui esses textos nem uma revisão de licença dos fo
 | windows_x86_64_msvc | 0.52.6 | `MIT OR Apache-2.0` |
 | winnow | 0.7.15 | `MIT` |
 | winnow | 1.0.4 | `MIT` |
+| winsafe | 0.0.29 | `MIT` |
 | wit-bindgen | 0.57.1 | `Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT` |
 | writeable | 0.6.4 | `Unicode-3.0` |
 | ws_stream_tungstenite | 0.15.0 | `Unlicense` |

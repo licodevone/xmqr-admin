@@ -345,6 +345,12 @@ impl Auth {
         };
         Self::from_path(PathBuf::from(path))
     }
+    pub fn from_config(path: Option<PathBuf>) -> io::Result<Self> {
+        match path {
+            Some(path) => Self::from_path(path),
+            None => Self::from_env(),
+        }
+    }
     #[cfg(unix)]
     fn from_path(path: PathBuf) -> io::Result<Self> {
         use fs2::FileExt;
@@ -375,7 +381,27 @@ impl Auth {
         let dummy = hash_password(&password).map_err(|_| invalid_store())?;
         Ok(Self::new(Some(path), Some(lock), file, dummy))
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
+    fn from_path(path: PathBuf) -> io::Result<Self> {
+        use fs2::FileExt;
+        crate::windows_private::parent(&path)?;
+        let mut name = path.as_os_str().to_os_string();
+        name.push(".lock");
+        let lock = crate::windows_private::open_or_create(Path::new(&name))?;
+        FileExt::try_lock_exclusive(&lock).map_err(|_| invalid_store())?;
+        let file = match fs::symlink_metadata(&path) {
+            Ok(_) => read_store(&path)?,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => UserFile {
+                version: 1,
+                users: Vec::new(),
+            },
+            Err(_) => return Err(invalid_store()),
+        };
+        let password = random_secret().map_err(|_| invalid_store())?;
+        let dummy = hash_password(&password).map_err(|_| invalid_store())?;
+        Ok(Self::new(Some(path), Some(lock), file, dummy))
+    }
+    #[cfg(not(any(unix, windows)))]
     fn from_path(_: PathBuf) -> io::Result<Self> {
         Err(io::Error::new(
             io::ErrorKind::Unsupported,
@@ -900,9 +926,99 @@ fn write_store(path: &Path, file: &UserFile) -> io::Result<()> {
         .and_then(|directory| directory.sync_all())
         .map_err(|_| invalid_store())
 }
-#[cfg(not(unix))]
+#[cfg(windows)]
+fn read_store(path: &Path) -> io::Result<UserFile> {
+    let file = crate::windows_private::open(path, false, false)?;
+    let mut bytes = Vec::new();
+    file.take((MAX_FILE + 1) as u64).read_to_end(&mut bytes)?;
+    if bytes.len() > MAX_FILE {
+        return Err(invalid_store());
+    }
+    let file: UserFile = serde_json::from_slice(&bytes).map_err(|_| invalid_store())?;
+    validate_store(&file)?;
+    Ok(file)
+}
+
+#[cfg(windows)]
+fn write_store(path: &Path, file: &UserFile) -> io::Result<()> {
+    let _parents = crate::windows_private::pin_parent(path)?;
+    validate_store(file)?;
+    if fs::symlink_metadata(path).is_ok() {
+        let _ = read_store(path)?;
+    }
+    let parent = path.parent().ok_or_else(invalid_store)?;
+    let bytes = serde_json::to_vec(file).map_err(|_| invalid_store())?;
+    if bytes.len() > MAX_FILE {
+        return Err(invalid_store());
+    }
+    let mut temporary = tempfile::Builder::new().make_in(parent, |candidate| {
+        crate::windows_private::open(candidate, true, true)
+    })?;
+    temporary.write_all(&bytes)?;
+    temporary.as_file().sync_all()?;
+    // Close the no-share-delete handle before the same-directory atomic rename.
+    // Pinned ancestor handles remain alive through replacement.
+    temporary
+        .into_temp_path()
+        .persist(path)
+        .map_err(|_| invalid_store())?;
+    Ok(())
+}
+
+#[cfg(not(any(unix, windows)))]
 fn write_store(_: &Path, _: &UserFile) -> io::Result<()> {
     Err(invalid_store())
+}
+
+#[cfg(all(test, windows))]
+mod windows_tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn native_store_bootstrap_login_and_restart() {
+        let directory = tempfile::tempdir().unwrap();
+        crate::windows_private::private_directory(directory.path());
+        let token_path = directory.path().join("token");
+        crate::token::create(&token_path).unwrap();
+        let token = crate::token::read(&token_path).unwrap();
+        let path = directory.path().join("users.json");
+        let auth = Auth::from_path(path.clone()).unwrap();
+        assert!(auth.config().await.setup_required);
+        assert!(Auth::from_path(path.clone()).is_err());
+        assert!(
+            auth.setup(
+                SetupRequest {
+                    bootstrap_token: token.as_str().into(),
+                    username: "admin".into(),
+                    display_name: "Administrator".into(),
+                    password: "test-native-password-42".into(),
+                },
+                &token
+            )
+            .await
+            .is_ok()
+        );
+        assert!(!auth.config().await.setup_required);
+        assert!(
+            auth.login(LoginRequest {
+                username: "admin".into(),
+                password: "test-native-password-42".into()
+            })
+            .await
+            .is_ok()
+        );
+        drop(auth);
+        let reopened = Auth::from_path(path).unwrap();
+        assert!(
+            reopened
+                .login(LoginRequest {
+                    username: "admin".into(),
+                    password: "test-native-password-42".into()
+                })
+                .await
+                .is_ok()
+        );
+    }
 }
 
 #[cfg(all(test, unix))]

@@ -2,12 +2,18 @@
 use fs2::FileExt;
 use std::{
     ffi::OsString,
-    fs::{self, File, OpenOptions},
-    io::{self, Read, Write},
+    fs::{self, File},
+    io,
     path::Path,
+};
+#[cfg(target_os = "linux")]
+use std::{
+    fs::OpenOptions,
+    io::{Read, Write},
 };
 use toml::Value;
 
+#[cfg(target_os = "linux")]
 const LIMIT: u64 = 1_048_576;
 
 #[expect(

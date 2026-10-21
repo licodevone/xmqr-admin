@@ -403,12 +403,15 @@ async fn js() -> impl IntoResponse {
 pub async fn serve(config: Config, token: Token) -> io::Result<()> {
     let address = config.bind;
     let board = Board::from_env()?;
-    let auth = tokio::task::spawn_blocking(Auth::from_env)
+    let users_file = config.users_file.clone();
+    let auth = tokio::task::spawn_blocking(move || Auth::from_config(users_file))
         .await
         .map_err(|_| io::Error::other("autenticacao indisponivel"))??;
     let router = routes(config, token, board.clone(), auth)
         .map_err(|_| io::Error::other("unable to initialize local HTTP client"))?;
     let listener = tokio::net::TcpListener::bind(address).await?;
+    #[cfg(all(windows, feature = "windows-service-runtime"))]
+    crate::windows_service::running()?;
     let (stop, stopped) = oneshot::channel::<()>();
     let server = axum::serve(crate::listener::BoundedListener::new(listener), router)
         .with_graceful_shutdown(async {
@@ -430,6 +433,10 @@ pub async fn serve(config: Config, token: Token) -> io::Result<()> {
 }
 
 async fn shutdown() {
+    #[cfg(all(windows, feature = "windows-service-runtime"))]
+    {
+        let _ = crate::windows_service::shutdown().await;
+    }
     #[cfg(unix)]
     {
         use tokio::signal::unix::{SignalKind, signal};
@@ -438,13 +445,15 @@ async fn shutdown() {
             return;
         }
     }
+    #[cfg(not(all(windows, feature = "windows-service-runtime")))]
     let _ = tokio::signal::ctrl_c().await;
 }
 
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use axum::body::Body;
+    #[cfg(unix)]
     use std::os::unix::fs::PermissionsExt;
     use tower::ServiceExt;
 
@@ -499,9 +508,13 @@ mod tests {
 
     fn test_state() -> App {
         let dir = tempfile::tempdir().unwrap();
+        #[cfg(windows)]
+        crate::windows_private::private_directory(dir.path());
+        #[cfg(unix)]
         std::fs::set_permissions(dir.path(), std::fs::Permissions::from_mode(0o700)).unwrap();
         let path = dir.path().join("test.token");
         std::fs::write(&path, [b'a'; 64]).unwrap();
+        #[cfg(unix)]
         std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
         App {
             config: Config::parse("127.0.0.1:9080", "127.0.0.1:9090", path.clone()).unwrap(),

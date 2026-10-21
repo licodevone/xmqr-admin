@@ -140,6 +140,8 @@ fn invalid_config() -> io::Error {
 }
 
 fn private_profile(path: &Path) -> io::Result<()> {
+    #[cfg(windows)]
+    let _file = crate::windows_private::open(path, false, false).map_err(|_| invalid_config())?;
     let metadata = std::fs::symlink_metadata(path).map_err(|_| invalid_config())?;
     if !path.is_absolute() || !metadata.is_file() || metadata.len() > 65536 {
         return Err(invalid_config());

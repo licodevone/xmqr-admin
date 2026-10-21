@@ -96,10 +96,14 @@ fn modify(
 }
 
 fn with_lock<T>(path: &Path, operation: impl FnOnce() -> io::Result<T>) -> io::Result<T> {
+    #[cfg(not(windows))]
     let parent = path
         .parent()
         .filter(|parent| !parent.as_os_str().is_empty())
         .unwrap_or_else(|| Path::new("."));
+    #[cfg(windows)]
+    let _parents = crate::windows_private::pin_parent(path)?;
+    #[cfg(not(windows))]
     fs::create_dir_all(parent)?;
     let lock_path = lock_path(path)?;
     reject_symlink(&lock_path)?;
@@ -134,7 +138,11 @@ fn read_users(path: &Path, allow_missing: bool) -> io::Result<UsersFile> {
         Err(error) => return Err(error),
     }
     let mut input = String::new();
-    File::open(path)?
+    #[cfg(windows)]
+    let input_file = crate::windows_private::open(path, false, false)?;
+    #[cfg(not(windows))]
+    let input_file = File::open(path)?;
+    input_file
         .take(MAX_CONFIG_BYTES + 1)
         .read_to_string(&mut input)?;
     if input.len() as u64 > MAX_CONFIG_BYTES {
@@ -186,7 +194,11 @@ fn write_atomic(path: &Path, users: &UsersFile) -> io::Result<()> {
         AuthPolicy::load_passwords(&temporary)
             .map_err(|_| invalid("generated users configuration failed validation"))?;
         fs::rename(&temporary, path)?;
-        sync_directory(parent)
+        #[cfg(not(windows))]
+        sync_directory(parent)?;
+        // Windows candidates are flushed before same-directory rename;
+        // std does not expose Unix directory-fsync semantics.
+        Ok(())
     })();
     if result.is_err() {
         let _ = fs::remove_file(&temporary);
@@ -226,7 +238,16 @@ fn open_private(path: &Path, create_new: bool) -> io::Result<File> {
     options.open(path)
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
+fn open_private(path: &Path, create_new: bool) -> io::Result<File> {
+    if create_new {
+        crate::windows_private::open(path, true, true)
+    } else {
+        crate::windows_private::open_or_create(path)
+    }
+}
+
+#[cfg(not(any(unix, windows)))]
 fn open_private(_path: &Path, _create_new: bool) -> io::Result<File> {
     Err(io::Error::new(
         io::ErrorKind::Unsupported,
@@ -246,7 +267,17 @@ fn ensure_private_permissions(metadata: &fs::Metadata) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
+fn ensure_private_permissions(metadata: &fs::Metadata) -> io::Result<()> {
+    // Windows callers use the handle ACL guard before reading/writing. This
+    // metadata check retains the regular-file requirement of the shared code.
+    if !metadata.is_file() {
+        return Err(invalid("users file must be regular"));
+    }
+    Ok(())
+}
+
+#[cfg(not(any(unix, windows)))]
 fn ensure_private_permissions(_metadata: &fs::Metadata) -> io::Result<()> {
     Err(io::Error::new(
         io::ErrorKind::Unsupported,
@@ -259,7 +290,7 @@ fn sync_directory(path: &Path) -> io::Result<()> {
     File::open(path)?.sync_all()
 }
 
-#[cfg(not(unix))]
+#[cfg(not(any(unix, windows)))]
 fn sync_directory(_path: &Path) -> io::Result<()> {
     Err(io::Error::new(
         io::ErrorKind::Unsupported,
@@ -298,10 +329,27 @@ mod tests {
             .to_string()
     }
 
+    #[cfg(windows)]
+    #[test]
+    fn native_users_create_update_list_delete() {
+        let directory = tempfile::tempdir().unwrap();
+        #[cfg(windows)]
+        crate::windows_private::private_directory(directory.path());
+        crate::windows_private::private_directory(directory.path());
+        let path = directory.path().join("users.toml");
+        create_user(&path, "alice", &hash(b"test-native-password")).unwrap();
+        assert_eq!(list_users(&path).unwrap(), vec!["alice"]);
+        update_password(&path, "alice", &hash(b"test-native-password-2")).unwrap();
+        delete_user(&path, "alice").unwrap();
+        assert_eq!(list_users(&path).unwrap(), [] as [String; 0]);
+    }
+
     #[cfg(unix)]
     #[test]
     fn updating_password_preserves_existing_certificate_binding() {
         let directory = tempfile::tempdir().unwrap();
+        #[cfg(windows)]
+        crate::windows_private::private_directory(directory.path());
         let path = directory.path().join("users.toml");
         create_user(&path, "device", &hash(b"first-password")).unwrap();
         let mut original = read_users(&path, false).unwrap();
@@ -318,6 +366,8 @@ mod tests {
     #[test]
     fn create_list_update_and_delete_preserve_valid_file() {
         let directory = tempfile::tempdir().unwrap();
+        #[cfg(windows)]
+        crate::windows_private::private_directory(directory.path());
         let path = directory.path().join("users.toml");
         create_user(&path, "student", &hash(b"first-password")).unwrap();
         assert_eq!(list_users(&path).unwrap(), ["student"]);
@@ -346,6 +396,8 @@ mod tests {
     #[test]
     fn duplicate_or_missing_user_keeps_original_bytes() {
         let directory = tempfile::tempdir().unwrap();
+        #[cfg(windows)]
+        crate::windows_private::private_directory(directory.path());
         let path = directory.path().join("users.toml");
         let password_hash = hash(b"password");
         create_user(&path, "student", &password_hash).unwrap();
@@ -358,6 +410,8 @@ mod tests {
     #[test]
     fn concurrent_writers_do_not_lose_updates() {
         let directory = tempfile::tempdir().unwrap();
+        #[cfg(windows)]
+        crate::windows_private::private_directory(directory.path());
         let path = Arc::new(directory.path().join("users.toml"));
         create_user(&path, "first", &hash(b"password")).unwrap();
         let hash = Arc::new(hash(b"password"));
@@ -380,6 +434,8 @@ mod tests {
     fn users_file_is_private_and_symlinks_are_rejected() {
         use std::os::unix::fs::{PermissionsExt, symlink};
         let directory = tempfile::tempdir().unwrap();
+        #[cfg(windows)]
+        crate::windows_private::private_directory(directory.path());
         let path = directory.path().join("users.toml");
         create_user(&path, "student", &hash(b"password")).unwrap();
         assert_eq!(
