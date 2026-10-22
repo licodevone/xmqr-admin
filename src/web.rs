@@ -402,7 +402,7 @@ async fn js() -> impl IntoResponse {
 
 pub async fn serve(config: Config, token: Token) -> io::Result<()> {
     let address = config.bind;
-    let board = Board::from_env()?;
+    let board = Board::from_config(config.mqtt_console.as_ref())?;
     let users_file = config.users_file.clone();
     let auth = tokio::task::spawn_blocking(move || Auth::from_config(users_file))
         .await

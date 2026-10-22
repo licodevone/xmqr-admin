@@ -1,5 +1,13 @@
 # XMQR Admin
 
+## Fonte A28 - console MQTT no Windows
+
+O TOML de `serve --config` e do servico aceita `[mqtt_console]` opcional,
+com executavel Client e perfis privados explicitos. Sem essa secao, o modo
+de ambiente anterior continua. Consulte [formato e limites](docs/windows-mqtt-console.md)
+e [validacao A28](prompts/registros/A28-windows-console-configuration.md).
+Essa alteracao de fonte nao atualiza o programa instalado automaticamente.
+
 ## Fonte A25 — disponibilidade no painel
 
 A Visão geral apresenta indicadores ON-LINE/OFF-LINE para o broker,

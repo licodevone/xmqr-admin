@@ -214,16 +214,47 @@ impl Board {
         let sub_profile = PathBuf::from(sub_profile);
         let pub_profile = env::var_os("XMQR_ADMIN_MQTT_PUB_PROFILE")
             .map_or_else(|| sub_profile.clone(), PathBuf::from);
-        private_profile(&sub_profile)?;
-        private_profile(&pub_profile)?;
         let binary = env::var_os("XMQR_ADMIN_MQTT_CLIENT_BIN")
             .map_or_else(|| PathBuf::from("/usr/bin/mqtt-client"), PathBuf::from);
+        let label = env::var("XMQR_ADMIN_MQTT_LABEL").unwrap_or_else(|_| "XMQR local".into());
+        Self::configured(binary, sub_profile, pub_profile, label)
+    }
+
+    pub fn from_config(config: Option<&crate::config::MqttConsole>) -> io::Result<Self> {
+        Self::from_source(config, Self::from_env)
+    }
+
+    fn from_source(
+        config: Option<&crate::config::MqttConsole>,
+        fallback: fn() -> io::Result<Self>,
+    ) -> io::Result<Self> {
+        let Some(config) = config else {
+            return fallback();
+        };
+        Self::configured(
+            config.client_bin.clone(),
+            config.sub_profile.clone(),
+            config
+                .pub_profile
+                .clone()
+                .unwrap_or_else(|| config.sub_profile.clone()),
+            config.label.clone(),
+        )
+    }
+
+    fn configured(
+        binary: PathBuf,
+        sub_profile: PathBuf,
+        pub_profile: PathBuf,
+        label: String,
+    ) -> io::Result<Self> {
+        private_profile(&sub_profile)?;
+        private_profile(&pub_profile)?;
         if !binary.is_absolute()
             || !std::fs::symlink_metadata(&binary).is_ok_and(|metadata| metadata.is_file())
         {
             return Err(invalid_config());
         }
-        let label = env::var("XMQR_ADMIN_MQTT_LABEL").unwrap_or_else(|_| "XMQR local".into());
         if !valid_text(&label, 80) {
             return Err(invalid_config());
         }
@@ -679,6 +710,88 @@ async fn subscribe_loop(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn console_fixture() -> (tempfile::TempDir, crate::config::MqttConsole) {
+        let directory = tempfile::tempdir().unwrap();
+        #[cfg(windows)]
+        crate::windows_private::private_directory(directory.path());
+        let profile = directory.path().join("sub.toml");
+        std::fs::write(&profile, "version=1").unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&profile, std::fs::Permissions::from_mode(0o600)).unwrap();
+        }
+        let config = crate::config::MqttConsole {
+            client_bin: std::env::current_exe().unwrap(),
+            sub_profile: profile,
+            pub_profile: None,
+            label: "Console de teste".into(),
+        };
+        (directory, config)
+    }
+
+    #[test]
+    fn explicit_console_does_not_use_environment_fallback_or_spawn_children() {
+        let (_directory, config) = console_fixture();
+        let board = Board::from_source(Some(&config), || panic!("unexpected environment fallback"))
+            .unwrap();
+        let snapshot = board.snapshot_now(false);
+        assert!(snapshot.enabled);
+        assert_eq!(snapshot.label, "Console de teste");
+        assert_eq!(snapshot.status, "disconnected");
+        assert!(board.inner.subscription.try_lock().unwrap().is_none());
+        let settings = board.inner.settings.as_ref().unwrap();
+        assert_eq!(settings.sub_profile, config.sub_profile);
+        assert_eq!(settings.pub_profile, config.sub_profile);
+        let fallback =
+            Board::from_source(None, || Ok(Board::new(None, "legacy fallback".into()))).unwrap();
+        assert_eq!(fallback.snapshot_now(false).label, "legacy fallback");
+    }
+
+    #[test]
+    fn explicit_console_rejects_missing_profiles_binary_and_invalid_label() {
+        let (_directory, mut config) = console_fixture();
+        config.pub_profile = Some(config.sub_profile.with_file_name("missing.toml"));
+        assert!(Board::from_config(Some(&config)).is_err());
+        config.pub_profile = None;
+        config.label = "bad\nlabel".into();
+        assert!(Board::from_config(Some(&config)).is_err());
+        config.label = "test".into();
+        config.client_bin = config.sub_profile.with_file_name("missing-client.exe");
+        assert!(Board::from_config(Some(&config)).is_err());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn explicit_console_rejects_public_profile_acl_and_oversize() {
+        use std::os::windows::fs::OpenOptionsExt;
+        let (directory, config) = console_fixture();
+        std::fs::write(&config.sub_profile, vec![0; 65537]).unwrap();
+        assert!(Board::from_config(Some(&config)).is_err());
+        std::fs::write(&config.sub_profile, "version=1").unwrap();
+        let mut profile = std::fs::OpenOptions::new()
+            .access_mode(0x0002_0000 | 0x0004_0000)
+            .share_mode(3)
+            .open(&config.sub_profile)
+            .unwrap();
+        let descriptor: windows_permissions::LocalBox<windows_permissions::SecurityDescriptor> =
+            "D:P(A;;FA;;;WD)".parse().unwrap();
+        windows_permissions::wrappers::SetSecurityInfo(
+            &mut profile,
+            windows_permissions::constants::SeObjectType::SE_FILE_OBJECT,
+            windows_permissions::constants::SecurityInformation::Dacl,
+            None,
+            None,
+            descriptor.dacl(),
+            None,
+        )
+        .unwrap();
+        assert!(private_profile(&config.sub_profile).is_err());
+        drop(profile);
+        // Keep the fixture directory alive until its handles are closed.
+        drop(directory);
+    }
 
     #[test]
     fn availability_tracks_subscription_state_without_exposing_messages_or_renewing_lease() {

@@ -16,6 +16,48 @@ struct Document {
     token_file: PathBuf,
     #[serde(default)]
     users_file: Option<PathBuf>,
+    #[serde(default)]
+    mqtt_console: Option<MqttConsole>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MqttConsole {
+    pub client_bin: PathBuf,
+    pub sub_profile: PathBuf,
+    #[serde(default)]
+    pub pub_profile: Option<PathBuf>,
+    #[serde(default = "console_label")]
+    pub label: String,
+}
+
+fn console_label() -> String {
+    "XMQR local".into()
+}
+
+impl MqttConsole {
+    fn resolve(mut self, parent: &Path) -> io::Result<Self> {
+        for path in [&mut self.client_bin, &mut self.sub_profile]
+            .into_iter()
+            .chain(self.pub_profile.iter_mut())
+        {
+            if !path.to_str().is_some_and(|text| {
+                !text.is_empty() && text.len() <= 4096 && !text.chars().any(char::is_control)
+            }) {
+                return Err(invalid("invalid MQTT console path"));
+            }
+            if !path.is_absolute() {
+                *path = parent.join(&*path);
+            }
+        }
+        if self.label.is_empty()
+            || self.label.len() > 80
+            || self.label.chars().any(char::is_control)
+        {
+            return Err(invalid("invalid MQTT console label"));
+        }
+        Ok(self)
+    }
 }
 
 #[derive(Clone)]
@@ -24,6 +66,7 @@ pub struct Config {
     pub monitor: SocketAddr,
     pub token_file: PathBuf,
     pub users_file: Option<PathBuf>,
+    pub mqtt_console: Option<MqttConsole>,
 }
 
 impl Config {
@@ -68,6 +111,15 @@ impl Config {
                 })
             })
             .transpose()?;
+        config.mqtt_console = document
+            .mqtt_console
+            .map(|console| {
+                console.resolve(
+                    path.parent()
+                        .ok_or_else(|| invalid("configuration needs parent directory"))?,
+                )
+            })
+            .transpose()?;
         Ok(config)
     }
 
@@ -87,6 +139,7 @@ impl Config {
             monitor: loopback(monitor)?,
             token_file,
             users_file: None,
+            mqtt_console: None,
         })
     }
 
@@ -128,6 +181,60 @@ fn invalid(message: &'static str) -> io::Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn console_config_resolves_paths_defaults_and_explicit_values() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("admin.toml");
+        let base = "version=1\nbind='127.0.0.1:9080'\nmonitor='127.0.0.1:9090'\ntoken_file='token'";
+        std::fs::write(&path, base).unwrap();
+        assert!(Config::from_file(&path).unwrap().mqtt_console.is_none());
+        let section = "\n[mqtt_console]\nclient_bin='client.exe'\nsub_profile='sub.toml'";
+        std::fs::write(&path, format!("{base}{section}")).unwrap();
+        let console = Config::from_file(&path).unwrap().mqtt_console.unwrap();
+        assert_eq!(console.client_bin, directory.path().join("client.exe"));
+        assert_eq!(console.sub_profile, directory.path().join("sub.toml"));
+        assert!(console.pub_profile.is_none());
+        assert_eq!(console.label, "XMQR local");
+        let absolute = directory.path().join("publish.toml");
+        std::fs::write(
+            &path,
+            format!(
+                "{base}{section}\npub_profile='{}'\nlabel='Console de teste'",
+                absolute.display()
+            ),
+        )
+        .unwrap();
+        let console = Config::from_file(&path).unwrap().mqtt_console.unwrap();
+        assert_eq!(console.pub_profile, Some(absolute));
+        assert_eq!(console.label, "Console de teste");
+    }
+
+    #[test]
+    fn console_config_rejects_unknown_missing_empty_control_and_oversize_fields() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("admin.toml");
+        let base = "version=1\nbind='127.0.0.1:9080'\nmonitor='127.0.0.1:9090'\ntoken_file='token'\n[mqtt_console]\n";
+        for section in [
+            "client_bin='client.exe'".to_owned(),
+            "sub_profile='sub.toml'".to_owned(),
+            "client_bin=''\nsub_profile='sub.toml'".to_owned(),
+            "client_bin='client.exe'\nsub_profile=''".to_owned(),
+            "client_bin='client.exe'\nsub_profile='sub.toml'\npub_profile=''".to_owned(),
+            "client_bin='client.exe'\nsub_profile='sub.toml'\npassword='not-accepted'".to_owned(),
+            "client_bin='client.exe'\nsub_profile='sub.toml'\nlabel=''".to_owned(),
+            "client_bin='client.exe'\nsub_profile='sub.toml'\nlabel=\"line\\nbreak\"".to_owned(),
+            "client_bin='client.exe'\nsub_profile=\"sub\\u0000.toml\"".to_owned(),
+            format!("client_bin='{}'\nsub_profile='sub.toml'", "x".repeat(4097)),
+            format!(
+                "client_bin='client.exe'\nsub_profile='sub.toml'\nlabel='{}'",
+                "x".repeat(81)
+            ),
+        ] {
+            std::fs::write(&path, format!("{base}{section}")).unwrap();
+            assert!(Config::from_file(&path).is_err());
+        }
+    }
 
     #[test]
     fn config_file_is_bounded_strict_and_preserves_loopback() {
